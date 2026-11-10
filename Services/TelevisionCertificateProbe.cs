@@ -37,9 +37,9 @@ internal static class TelevisionCertificateProbe
             try { await tls.AuthenticateAsClientAsync(new SslClientAuthenticationOptions { TargetHost = address }, timeout.Token); }
             catch (AuthenticationException) when (observed is not null) { }
             timeout.Token.ThrowIfCancellationRequested();
-            return observed ?? throw new TelevisionCertificateException("Телевизор не предоставил сертификат.");
+            return observed ?? throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("TelevisionCertificateProbe_178"));
         }
         catch (OperationCanceledException) when (!cancellation.IsCancellationRequested)
-        { throw new TimeoutException("Телевизор не ответил на проверку сертификата за 8 секунд. Включите ТВ и проверьте адрес."); }
+        { throw new TimeoutException(ControllerHelper.Localization.Text.Get("TelevisionCertificateProbe_179")); }
     }
 }

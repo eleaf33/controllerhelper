@@ -9,7 +9,7 @@ internal static class ProfileSwitchTransaction
         Action? finish = null, CancellationToken cancellation = default)
     {
         if (changeAudio is not null && (captureAudio is null || restoreAudio is null))
-            throw new ArgumentException("Для смены звука нужны захват и восстановление аудиовыхода.");
+            throw new ArgumentException(ControllerHelper.Localization.Text.Get("ProfileSwitchTransaction_171"));
 
         cancellation.ThrowIfCancellationRequested();
         TDisplaySnapshot displayBefore = await Task.Run(() => ErrorLog.Step("display.capture", captureDisplay));
@@ -29,7 +29,7 @@ internal static class ProfileSwitchTransaction
             bool confirmed = confirmDisplay is null || await confirmDisplay();
             cancellation.ThrowIfCancellationRequested();
             if (!confirmed)
-                throw new TimeoutException("Новая раскладка не подтверждена; выполняется возврат прежних экранов и звука.");
+                throw new TimeoutException(ControllerHelper.Localization.Text.Get("ProfileSwitchTransaction_172"));
             phase = "profile.finish";
             if (finish is not null) ErrorLog.Step("profile.finish", finish);
         }
@@ -48,7 +48,7 @@ internal static class ProfileSwitchTransaction
             ErrorLog.Event("profile.rollback.end", new { failures = rollbackErrors.Count });
             if (rollbackErrors.Count == 0) throw;
             throw new InvalidOperationException(
-                $"Переключение не удалось: {original.Message} Откат также не завершён: {string.Join("; ", rollbackErrors.Select(error => error.Message))}",
+                ControllerHelper.Localization.Text.Format("ProfileSwitchTransaction_173", original.Message, string.Join("; ", rollbackErrors.Select(error => error.Message))),
                 new AggregateException([original, .. rollbackErrors]));
         }
     }

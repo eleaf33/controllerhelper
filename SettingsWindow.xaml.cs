@@ -39,19 +39,21 @@ public sealed partial class SettingsWindow : Window
 
     private sealed record ResolutionChoice(int Width, int Height)
     {
-        public override string ToString() => Width == 0 ? "Из сохранённой раскладки" : $"{Width} × {Height}";
+        public override string ToString() => Width == 0 ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_275") : $"{Width} × {Height}";
     }
     private sealed record ScaleChoice(int? Percent)
     {
-        public override string ToString() => Percent is int value ? $"{value}%" : "Не изменять";
+        public override string ToString() => Percent is int value ? $"{value}%" : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_276");
     }
 
     public SettingsWindow(AppSettings settings, DisplayService displays, AudioService audio)
     {
         StartupTrace.Write("SettingsWindow constructor");
         InitializeComponent();
+        ((FrameworkElement)Content).Language = ControllerHelper.Localization.Text.LanguageTag;
+        LanguageBox.SelectedIndex = ControllerHelper.Localization.Text.NormalizeLanguage(settings.Language) == "ru" ? 1 : 0;
         StartupTrace.Write("SettingsWindow XAML initialized");
-        Title = "ControllerHelper — настройки";
+        Title = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_277");
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarDragRegion);
         AppWindow.Resize(new Windows.Graphics.SizeInt32(440, 740));
@@ -129,7 +131,7 @@ public sealed partial class SettingsWindow : Window
         RefreshDevices();
         if (SettingsStore.LoadWarning is string warning) StatusText.Text = warning;
         if (hotkeyCorrected)
-            StatusText.Text += " Неподдерживаемая кнопка хоткея заменена. Выберите сочетание GameInput и сохраните настройки.";
+            StatusText.Text += ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_278");
         StartupTrace.Write("SettingsWindow devices refreshed");
     }
 
@@ -171,10 +173,10 @@ public sealed partial class SettingsWindow : Window
             bool conflictingSelection = _settings.MonitorIds.Contains(_settings.TelevisionId ?? string.Empty,
                 StringComparer.OrdinalIgnoreCase);
             StatusText.Text = conflictingSelection
-                ? "В прежних настройках телевизор совпал с монитором ПК. Выберите телевизор из обновлённого списка и сохраните настройки."
-                : $"Найдено экранов: {screens.Length}, доступных аудиовыходов: {endpoints.Count(endpoint => endpoint.IsActive)}.";
+                ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_279")
+                : ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_280", screens.Length, endpoints.Count(endpoint => endpoint.IsActive));
             if (missingTvAudio)
-                StatusText.Text += " Сохранённый аудиовыход ТВ не найден. При включённом ТВ обновите список, выберите его текущий аудиовыход и сохраните настройки.";
+                StatusText.Text += ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_281");
         }
         catch (Exception error)
         {
@@ -208,7 +210,7 @@ public sealed partial class SettingsWindow : Window
         catch (Exception error)
         {
             ErrorLog.Write("audio.choices-refresh", error);
-            StatusText.Text = "Не удалось обновить аудиовыходы: " + error.Message;
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_282") + error.Message;
         }
     }
 
@@ -219,7 +221,7 @@ public sealed partial class SettingsWindow : Window
         DisplayDevice[] choices = _screens.Where(screen => !monitorIds.Contains(screen.Id)).ToArray();
         if (preferredId is not null && !monitorIds.Contains(preferredId) &&
             !choices.Any(screen => screen.Id.Equals(preferredId, StringComparison.OrdinalIgnoreCase)))
-            choices = [.. choices, new(preferredId, "Сохранённый ТВ (сейчас недоступен)", false)];
+            choices = [.. choices, new(preferredId, ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_283"), false)];
         _updatingTvTarget = true;
         try
         {
@@ -244,7 +246,7 @@ public sealed partial class SettingsWindow : Window
         }
         _tvCatalog = null;
         RenderTvVideoChoices();
-        TvVideoStatusText.Text = id is null ? "Выберите телевизор." : "Чтение режимов Windows…";
+        TvVideoStatusText.Text = id is null ? ControllerHelper.Localization.Text.Get("DisplayProfileCodec_058") : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_284");
         if (id is null) return;
         try
         {
@@ -253,14 +255,14 @@ public sealed partial class SettingsWindow : Window
             _tvCatalog = catalog;
             RenderTvVideoChoices();
             TvVideoStatusText.Text = catalog.ModeWarning ?? (catalog.CurrentMode is { } current
-                ? $"Сейчас в Windows: {current}." : "Режимы получены из Windows; ТВ сейчас не активен.");
+                ? ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_285", current) : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_286"));
             if (_chosenTelevisionMode is { } chosen && !catalog.Modes.Contains(chosen))
-                TvVideoStatusText.Text += " Сохранённый режим сейчас недоступен — выберите другой перед запуском.";
+                TvVideoStatusText.Text += ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_287");
         }
         catch (Exception error)
         {
             if (version != _tvCatalogVersion) return;
-            TvVideoStatusText.Text = error.Message + " Сохранённый выбор сохранится.";
+            TvVideoStatusText.Text = error.Message + ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_288");
             ErrorLog.Write("television.video.enumerate", error);
         }
     }
@@ -290,8 +292,8 @@ public sealed partial class SettingsWindow : Window
             TvScaleBox.ItemsSource = scales;
             TvScaleBox.SelectedItem = scales.First(choice => choice.Percent == _chosenTelevisionScale);
             TvScaleStatusText.Text = _tvCatalog?.ScaleWarning ?? (_tvCatalog?.Scale is { } range
-                ? $"Сейчас: {range.CurrentPercent}%. Список соответствует текущему режиму ТВ; после смены разрешения его можно обновить."
-                : "Для чтения доступного масштаба включите ТВ и обновите список. Масштаб мониторов не изменяется.");
+                ? ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_289", range.CurrentPercent)
+                : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_290"));
         }
         finally { _updatingTvVideo = false; }
     }
@@ -352,7 +354,7 @@ public sealed partial class SettingsWindow : Window
             {
                 if (error is not OperationCanceledException) ErrorLog.Write("profile.switch", error);
                 else ErrorLog.Event("profile.operation.canceled");
-                StatusText.Text = error is OperationCanceledException ? "Переключение отменено." : error.Message;
+                StatusText.Text = error is OperationCanceledException ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_291") : error.Message;
                 throw;
             }
             finally
@@ -369,7 +371,7 @@ public sealed partial class SettingsWindow : Window
 
     public Task StopProfileSwitchesAsync()
     {
-        StatusText.Text = "Завершение работы: ожидается окончание переключения и необходимого отката…";
+        StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_292");
         _pairingCancellation?.Cancel();
         _certificateCancellation?.Cancel();
         _hisenseCancellation?.Cancel();
@@ -384,11 +386,11 @@ public sealed partial class SettingsWindow : Window
         _profileSwitches.ValidateTelevisionProfile(settings);
         if (TelevisionNetworkSettings.WakeEnabled(settings))
         {
-            StatusText.Text = "Отправка команды пробуждения телевизору…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_293");
             ErrorLog.Event("television.wake.begin");
             await _televisionWake.SendWakeAsync(settings, cancellation);
             ErrorLog.Event("television.wake.ok");
-            StatusText.Text = "Телевизор пробуждается: ожидается устойчивое HDMI-подключение (до 30 секунд)…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_294");
         }
         cancellation.ThrowIfCancellationRequested();
         HisenseTarget hisenseTarget = HisenseTarget.From(settings);
@@ -399,8 +401,8 @@ public sealed partial class SettingsWindow : Window
         string? audioWarning = await _profileSwitches.SwitchToTelevisionAsync(settings, cancellation);
         string? warning = string.Join(" ", new[] { inputWarning, lgInputWarning, audioWarning }.Where(text => text is not null));
         StatusText.Text = string.IsNullOrEmpty(warning)
-            ? $"Активен профиль ТВ. Оверлей: {settings.HotkeyModifier} + {settings.HotkeyTrigger}."
-            : $"Активен профиль ТВ. {warning}";
+            ? ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_295", settings.HotkeyModifier, settings.HotkeyTrigger)
+            : ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_296", warning);
         if (string.IsNullOrEmpty(warning)) AppWindow.Hide();
     });
 
@@ -416,10 +418,10 @@ public sealed partial class SettingsWindow : Window
     public Task RecoverToPcAsync() => _profileOperations.RecoverAsync(cancellation =>
         ExecuteProfileSwitchAsync(async token =>
         {
-            StatusText.Text = "Аварийный возврат: восстановление мониторов…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_297");
             string? warning = await _profileSwitches.RecoverToPcAsync(_settings.Copy(), token);
-            StatusText.Text = warning is null ? "Аварийный возврат завершён: мониторы и звук ПК восстановлены."
-                : $"Мониторы восстановлены. {warning}";
+            StatusText.Text = warning is null ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_298")
+                : ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_299", warning);
             return true;
         }, cancellation));
 
@@ -427,8 +429,8 @@ public sealed partial class SettingsWindow : Window
     {
         string? steamError = await _profileSwitches.SwitchToPcAsync(settings, cancellation);
         StatusText.Text = steamError is null
-            ? "Активен профиль ПК. Команда выхода из Steam Big Picture отправлена."
-            : $"Активен профиль ПК, но не удалось закрыть Steam Big Picture: {steamError}";
+            ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_300")
+            : ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_301", steamError);
         return steamError;
     }
 
@@ -476,12 +478,12 @@ public sealed partial class SettingsWindow : Window
         if (result.PowerOffStatus is null) return;
         StatusText.Text = result.PowerOffStatus;
         if (result.PcWarning is not null)
-            StatusText.Text += $" Не удалось закрыть Steam Big Picture: {result.PcWarning}";
+            StatusText.Text += ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_302", result.PcWarning);
     }
 
     private async Task<string> PowerOffTelevisionAsync(AppSettings settings, CancellationToken cancellation)
     {
-        StatusText.Text = "Мониторы включены. Проверка состояния и выключение телевизора…";
+        StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_303");
         if (settings.TelevisionNetworkProvider == TelevisionNetworkProvider.Hisense)
         {
             HisenseTarget target = HisenseTarget.From(settings);
@@ -489,15 +491,15 @@ public sealed partial class SettingsWindow : Window
                 PersistHisenseConnection(settings, target, connection, cancellation));
             return result switch
             {
-                HisensePowerOffResult.AlreadyOff => "Мониторы включены. Hisense уже находится в режиме ожидания.",
-                HisensePowerOffResult.Confirmed => "Мониторы включены. Hisense подтвердил переход в режим ожидания.",
-                _ => "Мониторы включены. Команда выключения Hisense отправлена, но переход в режим ожидания не подтверждён. Подробности в logs."
+                HisensePowerOffResult.AlreadyOff => ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_304"),
+                HisensePowerOffResult.Confirmed => ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_305"),
+                _ => ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_306")
             };
         }
         TelevisionNetworkSettings.RequireLg(settings);
         bool confirmed = await _webOs.PowerOffAsync(settings, cancellation);
-        return confirmed ? "Мониторы включены. Телевизор подтвердил команду выключения."
-            : "Мониторы включены. Команда выключения отправлена, но телевизор не подтвердил её.";
+        return confirmed ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_307")
+            : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_308");
     }
 
     private void PersistHisenseConnection(AppSettings settings, HisenseTarget target, HisenseSession connection, CancellationToken cancellation)
@@ -519,8 +521,8 @@ public sealed partial class SettingsWindow : Window
         AppSettings settings = _settings;
         bool enabled = await _profileSwitches.ToggleMonitorsAsync(settings, cancellation);
         StatusText.Text = enabled
-            ? "Мониторы включены вместе с телевизором."
-            : "Мониторы выключены, телевизор остаётся включённым.";
+            ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_309")
+            : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_310");
         return enabled;
     });
 
@@ -529,10 +531,10 @@ public sealed partial class SettingsWindow : Window
         List<string> monitors = MonitorList.SelectedItems.Cast<DisplayDevice>().Select(screen => screen.Id).ToList();
         string? televisionId = (TelevisionBox.SelectedItem as DisplayDevice)?.Id;
         if (televisionId is not null && monitors.Contains(televisionId, StringComparer.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Телевизор не должен входить в список мониторов ПК.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_080"));
         string modifier = ((GamepadButtonChoice)ModifierBox.SelectedItem).Key;
         string trigger = ((GamepadButtonChoice)TriggerBox.SelectedItem).Key;
-        if (modifier == trigger) throw new InvalidOperationException("Выберите две разные кнопки геймпада.");
+        if (modifier == trigger) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("ControllerMonitor_052"));
         AppSettings candidate = _settings.Copy();
         if (!monitors.ToHashSet(StringComparer.OrdinalIgnoreCase).SetEquals(_settings.MonitorIds))
         {
@@ -549,6 +551,7 @@ public sealed partial class SettingsWindow : Window
         candidate.MonitorIds = monitors;
         candidate.TelevisionId = televisionId;
         candidate.TelevisionMode = _chosenTelevisionMode;
+        candidate.Language = LanguageBox.SelectedIndex == 1 ? "ru" : "en";
         candidate.TelevisionScalePercent = _chosenTelevisionScale;
         TelevisionDisplayOptions.Validate(candidate);
         candidate.PcAudioId = (PcAudioBox.SelectedItem as AudioEndpoint)?.Id;
@@ -600,7 +603,7 @@ public sealed partial class SettingsWindow : Window
     private void CommitSettings(AppSettings candidate)
     {
         if (_switching || _profileOperations.IsStopping)
-            throw new InvalidOperationException("Дождитесь завершения переключения экранов.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_251"));
         HisenseTarget oldHisense = HisenseTarget.From(_settings), newHisense = HisenseTarget.From(candidate);
         bool hisenseDeviceChanged = oldHisense.Display != newHisense.Display || oldHisense.Address != newHisense.Address || oldHisense.Mac != newHisense.Mac;
         bool lgDeviceChanged = !LgInputSettings.SameDevice(_settings, candidate);
@@ -633,7 +636,7 @@ public sealed partial class SettingsWindow : Window
     public void SetFlydigiCursorSpeed(double multiplier)
     {
         if (_switching)
-            throw new InvalidOperationException("Дождитесь завершения переключения экранов.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_251"));
         AppSettings candidate = _settings.Copy();
         candidate.FlydigiCursorSpeed = Math.Clamp(multiplier, 0.25, 2.5);
         SettingsStore.Save(candidate);
@@ -644,7 +647,7 @@ public sealed partial class SettingsWindow : Window
     {
         string modifier = (ModifierBox.SelectedItem as GamepadButtonChoice)?.Key ?? _settings.HotkeyModifier;
         string trigger = (TriggerBox.SelectedItem as GamepadButtonChoice)?.Key ?? _settings.HotkeyTrigger;
-        HotkeyDescription.Text = $"Оверлей: удерживайте {modifier} + {trigger} 0,5 секунды. B закрывает, A выбирает действие. Кнопка Guide/Home может перехватываться Game Bar.";
+        HotkeyDescription.Text = ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_311", modifier, trigger);
     }
 
     private void RefreshControllers()
@@ -669,7 +672,7 @@ public sealed partial class SettingsWindow : Window
             candidate.ControllerDeviceId = selected.Id;
             candidate.ControllerFingerprint = selected.Fingerprint;
             try { CommitSettings(candidate); }
-            catch (Exception error) { ControllerStatus.Text = $"Геймпад выбран, но не удалось сохранить настройку: {error.Message}"; }
+            catch (Exception error) { ControllerStatus.Text = ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_312", error.Message); }
         }
     }
 
@@ -687,10 +690,10 @@ public sealed partial class SettingsWindow : Window
     private void UpdateControllerStatus()
     {
         ControllerStatus.Text = _controller?.Error ?? (_controller?.Devices.Count == 0
-            ? "Геймпады не обнаружены. Подключите контроллер."
+            ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_313")
             : ControllerBox.SelectedItem is ControllerDevice selected
-                ? $"Подключён: {selected.Name}"
-                : "Выберите подключённый геймпад.");
+                ? ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_314", selected.Name)
+                : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_315"));
     }
 
     private void UpdateControllerButtons()
@@ -710,10 +713,10 @@ public sealed partial class SettingsWindow : Window
         }
     }
 
-    private void LearnModifier_Click(object sender, RoutedEventArgs args) => LearnButton(ModifierBox, "первую");
-    private void LearnTrigger_Click(object sender, RoutedEventArgs args) => LearnButton(TriggerBox, "вторую");
-    private void LearnEmergencyModifier_Click(object sender, RoutedEventArgs args) => LearnButton(EmergencyModifierBox, "первую для возврата");
-    private void LearnEmergencyTrigger_Click(object sender, RoutedEventArgs args) => LearnButton(EmergencyTriggerBox, "вторую для возврата");
+    private void LearnModifier_Click(object sender, RoutedEventArgs args) => LearnButton(ModifierBox, ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_316"));
+    private void LearnTrigger_Click(object sender, RoutedEventArgs args) => LearnButton(TriggerBox, ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_317"));
+    private void LearnEmergencyModifier_Click(object sender, RoutedEventArgs args) => LearnButton(EmergencyModifierBox, ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_318"));
+    private void LearnEmergencyTrigger_Click(object sender, RoutedEventArgs args) => LearnButton(EmergencyTriggerBox, ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_319"));
     private void EmergencyReturn_Toggled(object sender, RoutedEventArgs args)
     {
         if (EmergencyReturnOptions is not null) EmergencyReturnOptions.IsEnabled = EmergencyReturnToggle.IsOn;
@@ -723,22 +726,27 @@ public sealed partial class SettingsWindow : Window
     {
         if (_controller is null || ControllerBox.SelectedItem is not ControllerDevice)
         {
-            StatusText.Text = "Сначала выберите подключённый геймпад.";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_320");
             return;
         }
-        StatusText.Text = $"Нажмите {label} кнопку на выбранном геймпаде...";
+        StatusText.Text = ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_321", label);
         _controller.LearnButton(key =>
         {
             _buttonCatalog.Ensure(key);
             RefreshButtonBoxes();
             box.SelectedItem = ((GamepadButtonChoice[])box.ItemsSource).First(choice => choice.Key == key);
-            StatusText.Text = $"Обнаружена кнопка {key}. Сохраните настройки.";
+            StatusText.Text = ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_322", key);
         });
     }
 
     private void Save_Click(object sender, RoutedEventArgs args)
     {
-        try { CommitSettings(ReadSelections()); StatusText.Text = "Настройки сохранены."; }
+        try
+        {
+            CommitSettings(ReadSelections());
+            StatusText.Text = ControllerHelper.Localization.Text.Get(_settings.Language == ControllerHelper.Localization.Text.Language
+                ? "SettingsWindow_xaml_323" : "Language_RestartSaved");
+        }
         catch (Exception error) { StatusText.Text = error.Message; }
     }
 
@@ -758,16 +766,16 @@ public sealed partial class SettingsWindow : Window
         string previousMac = macBox.Text;
         try
         {
-            StatusText.Text = "Проверка соединения с телевизором…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_324");
             TelevisionConnectionResult result = await _televisionWake.CheckConnectionAsync(requestedAddress);
             if (addressBox.Text != requestedAddress || macBox.Text != previousMac) return;
             if (result.MacAddress is not null && string.IsNullOrWhiteSpace(macBox.Text))
                 macBox.Text = result.MacAddress;
             StatusText.Text = result.Reachable
                 ? result.MacAddress is not null
-                    ? "Сетевой интерфейс отвечает, MAC определён. Состояние экрана неизвестно; сохраните настройки."
-                    : "Сетевой интерфейс отвечает, но MAC не определён. Состояние экрана неизвестно; введите MAC вручную."
-                : "Сетевой интерфейс не ответил. Это не проверка пробуждения; включите ТВ для определения MAC или введите его вручную.";
+                    ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_325")
+                    : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_326")
+                : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_327");
         }
         catch (Exception error) { StatusText.Text = error.Message; }
         finally { button.IsEnabled = true; }
@@ -785,21 +793,21 @@ public sealed partial class SettingsWindow : Window
             TelevisionPairingTarget target = TelevisionPairingTarget.From(_settings);
             AppSettings pairingSettings = _settings.Copy();
             _pairingCancellation = cancellation;
-            StatusText.Text = "Настройки сохранены. Подтвердите сопряжение ControllerHelper на включённом телевизоре…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_328");
             string key = await _webOs.PairAsync(pairingSettings, cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
             TelevisionPairingTarget editedTarget = ReadTelevisionTarget();
             if (editedTarget != target)
-                throw new InvalidOperationException("Параметры телевизора в форме изменились. Сохраните их и повторите сопряжение.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_329"));
             CommitSettings(target.ApplyKey(_settings, key));
-            StatusText.Text = "LG сопряжён. Для автоматического выбора HDMI нажмите «Обновить входы телевизора», выберите вход компьютера и сохраните настройки.";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_330");
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
-        { StatusText.Text = "Сопряжение отменено: изменился телевизор или приложение завершает работу."; }
+        { StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_331"); }
         catch (Exception error)
         {
             ErrorLog.Write("television.pair", error);
-            StatusText.Text = $"Не удалось сопрячь телевизор: {error.Message}";
+            StatusText.Text = ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_332", error.Message);
         }
         finally { _pairingCancellation = null; PairTvButton.IsEnabled = true; }
     }
@@ -811,10 +819,10 @@ public sealed partial class SettingsWindow : Window
     private void UpdateCertificateStatus()
     {
         CertificateStatusText.Text = _settings.AllowInsecureWebOs
-            ? "Сохранён старый режим: соединение не зашифровано. Для TLS снимите флажок и проверьте сертификат."
+            ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_333")
             : WebOsSecurity.HasFingerprint(_settings.TelevisionCertificateSha256)
-                ? "TLS: сертификат закреплён. SHA-256: " + _settings.TelevisionCertificateSha256
-                : "TLS: перед сопряжением проверьте и подтвердите сертификат включённого телевизора.";
+                ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_334") + _settings.TelevisionCertificateSha256
+                : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_335");
     }
 
     private async void CheckCertificate_Click(object sender, RoutedEventArgs args)
@@ -825,56 +833,56 @@ public sealed partial class SettingsWindow : Window
         try
         {
             if (AllowInsecureWebOsBox.IsChecked == true)
-                throw new InvalidOperationException("Снимите флажок старого режима, чтобы настроить защищённое соединение.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_336"));
             CommitSettings(ReadSelections());
             TelevisionNetworkSettings.RequireLg(_settings);
             TelevisionPairingTarget target = TelevisionPairingTarget.From(_settings);
             string? address = _settings.TelevisionIpAddress;
             _certificateCancellation = cancellation;
-            StatusText.Text = "Настройки сохранены. Проверяется сертификат ТВ; ключ сопряжения не отправляется…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_337");
             TelevisionCertificate certificate = await TelevisionCertificateProbe.ReadAsync(address, cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
             if (ReadTelevisionTarget() != target || TelevisionPairingTarget.From(_settings) != target)
-                throw new InvalidOperationException("Параметры ТВ изменились. Повторите проверку сертификата.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_338"));
             DateTimeOffset now = DateTimeOffset.UtcNow;
             if (now < certificate.NotBefore || now > certificate.NotAfter)
-                throw new TelevisionCertificateException("Срок действия сертификата ТВ недопустим. Проверьте дату на ПК и обновления телевизора.");
+                throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_339"));
             bool changed = WebOsSecurity.HasFingerprint(target.Certificate) && target.Certificate != certificate.Sha256;
             ContentDialog dialog = new()
             {
                 XamlRoot = ((FrameworkElement)Content).XamlRoot,
-                Title = changed ? "Сертификат телевизора изменился" : "Доверие к сертификату ТВ",
+                Title = changed ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_340") : ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_341"),
                 Content = new TextBlock
                 {
                     TextWrapping = TextWrapping.Wrap,
                     IsTextSelectionEnabled = true,
-                    Text = $"Адрес: {address}\nSHA-256:\n{certificate.Sha256}\nДействителен до {certificate.NotAfter.LocalDateTime:d}.\n\n" +
-                        (changed ? "Прежний сертификат больше не совпадает. Это может быть обновление ТВ или подмена устройства.\n\n" : "") +
-                        "Первое доверие не подтверждает подлинность устройства. Продолжайте только в доверенной локальной сети, убедившись, что это адрес вашего ТВ. Сверьте отпечаток с независимым источником, если он доступен. Изменение сертификата потребует повторного сопряжения.",
+                    Text = ControllerHelper.Localization.Text.Format("SettingsWindow_xaml_342", address, certificate.Sha256, certificate.NotAfter.LocalDateTime) +
+                        (changed ? ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_343") : "") +
+                        ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_344"),
                     MaxWidth = 380
                 },
-                PrimaryButtonText = "Доверять сертификату",
-                CloseButtonText = "Отмена",
+                PrimaryButtonText = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_345"),
+                CloseButtonText = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_263"),
                 DefaultButton = ContentDialogButton.Close
             };
             using (cancellation.Token.Register(() => DispatcherQueue.TryEnqueue(() => dialog.Hide())))
             {
                 ContentDialogResult result = await dialog.ShowAsync();
                 cancellation.Token.ThrowIfCancellationRequested();
-                if (result != ContentDialogResult.Primary) { StatusText.Text = "Доверие к сертификату не изменено."; return; }
+                if (result != ContentDialogResult.Primary) { StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_346"); return; }
             }
             if (ReadTelevisionTarget() != target)
-                throw new InvalidOperationException("Параметры ТВ в форме изменились. Повторите проверку сертификата.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_347"));
             // The dialog confirmed this exact snapshot; merge into the latest settings only now.
             CommitSettings(WebOsSecurity.ApplyCertificate(_settings, target, certificate.Sha256));
-            StatusText.Text = "Сертификат сохранён. Нажмите «Сопрячь телевизор», если ключ ещё не получен.";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_348");
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
-        { StatusText.Text = "Проверка сертификата отменена."; }
+        { StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_349"); }
         catch (Exception error)
         {
             ErrorLog.Write("television.certificate-check", error);
-            StatusText.Text = "Не удалось проверить сертификат: " + error.Message;
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_350") + error.Message;
         }
         finally { _certificateCancellation = null; CheckCertificateButton.IsEnabled = PairTvButton.IsEnabled = true; }
     }
@@ -884,11 +892,11 @@ public sealed partial class SettingsWindow : Window
         try
         {
             if (_switching || _profileOperations.IsStopping)
-                throw new InvalidOperationException("Дождитесь завершения переключения экранов.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_251"));
             AppSettings candidate = ReadSelections();
             _displays.CaptureTelevisionLayout(candidate);
             CommitSettings(candidate);
-            StatusText.Text = "Текущая раскладка ТВ сохранена.";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_351");
         }
         catch (Exception error) { StatusText.Text = error.Message; }
     }
@@ -900,7 +908,7 @@ public sealed partial class SettingsWindow : Window
             AppSettings candidate = ReadSelections();
             _displays.CapturePcLayout(candidate);
             CommitSettings(candidate);
-            StatusText.Text = "Текущая раскладка ПК сохранена.";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_xaml_352");
         }
         catch (Exception error) { StatusText.Text = error.Message; }
     }

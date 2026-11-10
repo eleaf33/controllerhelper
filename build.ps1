@@ -27,7 +27,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Не удалось определить компилятор SDK.' }
     $compiler = Join-Path $sdkDirectory 'Roslyn\bincore\csc.dll'
     $framework = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319'
-    $references = @('mscorlib.dll', 'System.dll', 'System.Core.dll')
+    $references = @('mscorlib.dll', 'System.dll', 'System.Core.dll', 'System.Runtime.Serialization.dll', 'System.Xml.dll')
     $compileArguments = @($compiler, '/nologo', '/noconfig', '/nostdlib+', '/deterministic+', '/optimize+', '/target:winexe',
         "/out:$(Join-Path $stage 'ControllerHelper.exe')", "/win32icon:$(Join-Path $PSScriptRoot 'controller.ico')")
     foreach ($reference in $references) { $compileArguments += "/reference:$(Join-Path $framework $reference)" }

@@ -24,6 +24,8 @@ public partial class App : Application
 
     public App()
     {
+        ControllerHelper.Localization.Text.SetLanguage(ControllerHelper.Localization.Text.ReadLanguagePreference(
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ControllerHelper", "settings.json")));
         ErrorLog.Event("application.start", new {
             os = Environment.OSVersion.VersionString,
             architecture = RuntimeInformation.ProcessArchitecture.ToString(),
@@ -52,7 +54,7 @@ public partial class App : Application
             catch (Exception error)
             {
                 ErrorLog.Write("ipc.send", error);
-                MessageBox(0, $"Не удалось передать команду работающему ControllerHelper: {error.Message}\nЕсли запущена прежняя версия, закройте её через трей и повторите запуск.",
+                MessageBox(0, ControllerHelper.Localization.Text.Format("App_xaml_001", error.Message),
                     "ControllerHelper", 0x10);
             }
             finally { _mutex.Dispose(); Exit(); }
@@ -60,6 +62,7 @@ public partial class App : Application
         }
 
         AppSettings settings = SettingsStore.Load();
+        ControllerHelper.Localization.Text.SetLanguage(settings.Language);
         ErrorLog.Event("settings.loaded", new { warning = SettingsStore.LoadWarning is not null });
         StartupTrace.Write("Settings loaded");
         _settingsWindow = new SettingsWindow(settings, new DisplayService(), new AudioService());
@@ -78,7 +81,7 @@ public partial class App : Application
         _settingsWindow.AttachController(_controller);
         _controller.HotkeyPressed += ShowOverlay;
         _controller.EmergencyReturnPressed += RecoverToPc;
-        /* Подписки на потоковую диагностику кнопок (см. ControllerMonitor.StateChanged).
+        /* Optional live button diagnostics (see ControllerMonitor.StateChanged).
         _controller.StateChanged += _settingsWindow.ReportController;
         bool controllerStatusLogged = false;
         _controller.StateChanged += message =>
@@ -128,7 +131,7 @@ public partial class App : Application
                     ErrorLog.Write("ipc.listen", error);
                     StartupTrace.Write($"Command pipe failed: {error}");
                     _settingsWindow?.DispatcherQueue.TryEnqueue(() =>
-                        _settingsWindow?.ReportError($"Не удалось принимать команды ярлыка: {error.Message}"));
+                        _settingsWindow?.ReportError(ControllerHelper.Localization.Text.Format("App_xaml_002", error.Message)));
                 }
                 try { await Task.Delay(1000, cancellation); }
                 catch (OperationCanceledException) { break; }
@@ -138,7 +141,7 @@ public partial class App : Application
 
     private static void SendCommand(string command)
     {
-        if (!CommandProtocol.IsSupported(command)) throw new ArgumentException("Неизвестная команда.", nameof(command));
+        if (!CommandProtocol.IsSupported(command)) throw new ArgumentException(ControllerHelper.Localization.Text.Get("App_xaml_003"), nameof(command));
         using NamedPipeClientStream pipe = new(".", PipeName, PipeDirection.Out);
         pipe.Connect(3000);
         using StreamWriter writer = new(pipe) { AutoFlush = true };
@@ -250,7 +253,7 @@ public partial class App : Application
             ErrorLog.Write("recovery.run", error);
             if (_exitRequested) return;
             ShowSettings();
-            _settingsWindow.ReportError("Не удалось восстановить мониторы: " + error.Message);
+            _settingsWindow.ReportError(ControllerHelper.Localization.Text.Get("App_xaml_004") + error.Message);
         }
     }
 
@@ -267,7 +270,7 @@ public partial class App : Application
             _exitRequested = false;
             ErrorLog.Write("application.quit", error);
             ShowSettings();
-            _settingsWindow?.ReportError($"Выход отменён: не удалось завершить переключение. {error.Message}");
+            _settingsWindow?.ReportError(ControllerHelper.Localization.Text.Format("App_xaml_005", error.Message));
             return;
         }
         _quitting = true;

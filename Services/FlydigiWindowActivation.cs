@@ -19,7 +19,6 @@ internal static class FlydigiWindowActivation
                 return candidate;
             await delay(TimeSpan.FromMilliseconds(250), cancellation);
         }
-        throw new InvalidOperationException("Flydigi не показал главное окно после штатного запуска. " +
-            "Проверьте, открывается ли клиент его обычным ярлыком. Подробности в logs.");
+        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("FlydigiWindowActivation_085"));
     }
 }

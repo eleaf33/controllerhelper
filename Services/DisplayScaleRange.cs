@@ -11,7 +11,7 @@ public sealed record DisplayScaleRange(int MinimumRelative, int CurrentRelative,
         if (MinimumRelative > 0 || MinimumRelative < -11 || MaximumRelative < 0 ||
             (long)MaximumRelative - MinimumRelative >= Percentages.Length ||
             CurrentRelative < MinimumRelative || CurrentRelative > MaximumRelative)
-            throw new NotSupportedException("Windows вернула неподдерживаемый диапазон масштаба ТВ.");
+            throw new NotSupportedException(ControllerHelper.Localization.Text.Get("DisplayScaleRange_068"));
     }
 
     internal int RelativeFor(int percent)
@@ -19,7 +19,7 @@ public sealed record DisplayScaleRange(int MinimumRelative, int CurrentRelative,
         Validate();
         int index = Array.IndexOf(Percentages, percent);
         if (index < 0 || index > MaximumRelative - MinimumRelative)
-            throw new InvalidOperationException($"Масштаб {percent}% недоступен для текущего режима ТВ.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Format("DisplayScaleRange_069", percent));
         return index + MinimumRelative;
     }
 

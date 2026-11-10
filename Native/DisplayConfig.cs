@@ -126,7 +126,7 @@ internal static class DisplayConfig
             Array.Resize(ref modes, (int)modeCount);
             return (paths, modes);
         }
-        throw new InvalidOperationException("Список дисплеев менялся во время опроса. Повторите попытку.");
+        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayConfig_017"));
     }
 
     internal static (string Name, string Path) Describe(DisplayTarget target)
@@ -181,7 +181,7 @@ internal static class DisplayConfig
 
     internal static void ValidateTopology(DisplayPath[] paths, DisplayMode[] modes)
     {
-        if (paths.Length == 0) throw new InvalidOperationException("Нельзя отключить все экраны.");
+        if (paths.Length == 0) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayConfig_018"));
         uint flags = TopologyFlags(modes);
         ThrowOnError(SetDisplayConfig((uint)paths.Length, paths, (uint)modes.Length, modes.Length == 0 ? null : modes, flags | Validate));
     }

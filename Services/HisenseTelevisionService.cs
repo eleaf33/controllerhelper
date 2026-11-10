@@ -13,7 +13,7 @@ internal sealed class HisenseTelevisionService(Func<IHisenseTransport>? createTr
         Action<HisenseSession>? persistConnection = null)
     {
         HisenseSettings.Validate(settings);
-        if (!settings.HisensePaired) throw new InvalidOperationException("Сначала выполните сопряжение Hisense для выключения по сети.");
+        if (!settings.HisensePaired) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseTelevisionService_141"));
         // No WoL, input switching, PIN prompt or retry of a power toggle here.
         return await HisenseSession.Stage("power.off", async token =>
         {
@@ -33,7 +33,7 @@ internal sealed class HisenseTelevisionService(Func<IHisenseTransport>? createTr
         try
         {
             HisenseSettings.Validate(settings);
-            if (!settings.HisensePaired) throw new InvalidOperationException("Выполните сопряжение Hisense для выбора HDMI.");
+            if (!settings.HisensePaired) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseTelevisionService_142"));
             if (settings.WakeHisense) await WaitForBrokerAsync(settings.HisenseIpAddress, cancellation);
             using HisenseSession session = CreateSession(settings);
             await session.ConnectAsync(settings, cancellation);
@@ -46,7 +46,7 @@ internal sealed class HisenseTelevisionService(Func<IHisenseTransport>? createTr
         catch (Exception error)
         {
             ErrorLog.Write("hisense.input.warning", error);
-            return "Hisense не подтвердил выбор HDMI. Выберите вход пультом; подробности в logs/errors.jsonl.";
+            return ControllerHelper.Localization.Text.Get("HisenseTelevisionService_143");
         }
     }
 

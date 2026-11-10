@@ -30,7 +30,7 @@ internal static class TelevisionAudioFallback
             try
             {
                 ErrorLog.Step("audio.tv.pc-fallback", () => set(pcId, cancellation));
-                return "Звук ТВ недоступен; выбран аудиовыход ПК. Изображение остаётся на ТВ.";
+                return ControllerHelper.Localization.Text.Get("TelevisionAudioFallback_175");
             }
             catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { throw; }
             catch (Exception error) { ErrorLog.Write("audio.tv.pc-fallback-failed", error); }
@@ -42,10 +42,10 @@ internal static class TelevisionAudioFallback
             try
             {
                 ErrorLog.Step("audio.tv.restore-previous", () => restore(before));
-                return "Не удалось выбрать звук ТВ или ПК; восстановлены прежние аудиовыходы. Изображение остаётся на ТВ.";
+                return ControllerHelper.Localization.Text.Get("TelevisionAudioFallback_176");
             }
             catch (Exception error) { ErrorLog.Write("audio.tv.restore-previous-failed", error); }
         }
-        return "Не удалось настроить звук ТВ или резервный звук ПК. Выберите звук в Windows; изображение остаётся на ТВ.";
+        return ControllerHelper.Localization.Text.Get("TelevisionAudioFallback_177");
     }
 }

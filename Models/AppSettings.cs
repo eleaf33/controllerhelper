@@ -7,6 +7,7 @@ public enum TelevisionNetworkProvider { LG, Hisense }
 
 public sealed class AppSettings
 {
+    public string Language { get; set; } = "en";
     public string? TelevisionId { get; set; }
     public List<string> MonitorIds { get; set; } = [];
     public string? PcAudioId { get; set; }

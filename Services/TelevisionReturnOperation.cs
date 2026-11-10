@@ -18,7 +18,7 @@ internal static class TelevisionReturnOperation
             // Display/audio rollback has already ended. A TV network error must
             // never reverse a successful return to PC, or send a second toggle.
             ErrorLog.Write("television.return.power-off", error);
-            throw new InvalidOperationException($"Мониторы включены, но телевизор не удалось выключить: {error.Message}", error);
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Format("TelevisionReturnOperation_190", error.Message), error);
         }
     }
 }

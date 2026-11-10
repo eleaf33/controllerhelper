@@ -14,9 +14,7 @@ internal sealed partial class FlydigiWindowService
         // Access denied is not a geometry failure. Do not infer elevation solely from
         // an unreadable token, or retry window manipulation with higher privileges.
         if (code == 5)
-            message = "Windows запретила управление окном Flydigi (код 5: отказано в доступе). " +
-                "Полностью завершите Flydigi через значок в трее и запустите его обычным способом, " +
-                "без прав администратора. Затем повторите открытие из оверлея. Подробности в logs.";
+            message = ControllerHelper.Localization.Text.Get("FlydigiWindowService_Diagnostics_096");
         return code != 0 ? new Win32Exception(code, message) : new InvalidOperationException(message);
     }
 

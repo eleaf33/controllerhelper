@@ -67,7 +67,7 @@ public sealed partial class WebOsTelevisionService
     public async Task<bool> PowerOffAsync(AppSettings settings, CancellationToken cancellation = default)
     {
         if (string.IsNullOrWhiteSpace(settings.TelevisionClientKey))
-            throw new InvalidOperationException("Сначала сопрягите телевизор во вкладке ТВ.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_202"));
         using CancellationTokenSource timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
         timeout.CancelAfter(RequestTimeout);
         using ClientWebSocket socket = await _connect(settings, timeout.Token);
@@ -84,13 +84,13 @@ public sealed partial class WebOsTelevisionService
             if (response.RootElement.GetProperty("type").GetString() != "response" ||
                 !response.RootElement.TryGetProperty("payload", out JsonElement payload) ||
                 !payload.TryGetProperty("returnValue", out JsonElement accepted) || !accepted.GetBoolean())
-                throw new InvalidOperationException("Телевизор отклонил команду выключения.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_203"));
             return true;
         }
         catch (OperationCanceledException) when (!timeout.IsCancellationRequested) { return false; }
         catch (WebSocketException) when (socket.State != WebSocketState.Open) { return false; }
         catch (InvalidOperationException error) when (
-            error.Message == "Телевизор закрыл соединение webOS." &&
+            error.Message == ControllerHelper.Localization.Text.Get("WebOsTelevisionService_204") &&
             (socket.State is WebSocketState.CloseReceived or WebSocketState.Closed))
         {
             return false;
@@ -104,7 +104,7 @@ public sealed partial class WebOsTelevisionService
         using (JsonDocument hello = await ReceiveAsync(socket, cancellation))
         {
             if (hello.RootElement.GetProperty("type").GetString() != "hello")
-                throw new InvalidOperationException("Телевизор не ответил на приветствие webOS.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_205"));
         }
 
         await SendAsync(socket, new
@@ -135,12 +135,12 @@ public sealed partial class WebOsTelevisionService
                 response.RootElement.GetProperty("payload").TryGetProperty("client-key", out JsonElement key))
             {
                 if (inputControl) ErrorLog.Event("lg.input.registration", new { accepted = true, inputControl = true, launch = true, readRunningApps = true });
-                return key.GetString() ?? throw new InvalidOperationException("Телевизор не выдал ключ сопряжения.");
+                return key.GetString() ?? throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionPairingTarget_188"));
             }
             if (type == "error")
             {
                 if (inputControl) throw InputResponseError(ReadInputResponse(response.RootElement, "register-input-control"));
-                throw new InvalidOperationException("Сопряжение с телевизором отклонено: " +
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_206") +
                     (response.RootElement.TryGetProperty("error", out JsonElement error) ? error.GetString() : type));
             }
             if (!allowPairingPrompt && type == "response" && response.RootElement.TryGetProperty("payload", out var reply) &&
@@ -148,7 +148,7 @@ public sealed partial class WebOsTelevisionService
                 pairingType.ValueKind == JsonValueKind.String && pairingType.GetString() == "PROMPT")
             {
                 if (inputControl) ErrorLog.Event("lg.input.registration", new { accepted = false, reason = "pairing-required" });
-                throw new InvalidOperationException("LG требует разрешение управления входами. Нажмите «Сопрячь телевизор» в блоке LG и подтвердите запрос на ТВ.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_207"));
             }
         }
     }
@@ -181,10 +181,10 @@ public sealed partial class WebOsTelevisionService
         {
             result = await socket.ReceiveAsync(buffer, cancellation);
             if (result.MessageType == WebSocketMessageType.Close)
-                throw new InvalidOperationException("Телевизор закрыл соединение webOS.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_204"));
             stream.Write(buffer, 0, result.Count);
             if (stream.Length > 1024 * 1024)
-                throw new InvalidOperationException("Слишком большой ответ телевизора.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_208"));
         } while (!result.EndOfMessage);
         return JsonDocument.Parse(stream.ToArray());
     }

@@ -30,7 +30,7 @@ internal sealed class TelevisionReadiness(TimeProvider? clock = null,
             if (elapsed >= Timeout)
             {
                 ErrorLog.Event("television.hdmi.wait.timeout", new { polls, elapsedMs = elapsed.TotalMilliseconds });
-                throw new TimeoutException("После пробуждения Windows не обнаружила устойчивое HDMI-подключение телевизора за 30 секунд. Проверьте, включён ли ТВ и подключён ли HDMI-кабель, затем повторите попытку.");
+                throw new TimeoutException(ControllerHelper.Localization.Text.Get("TelevisionReadiness_189"));
             }
             if (available)
             {

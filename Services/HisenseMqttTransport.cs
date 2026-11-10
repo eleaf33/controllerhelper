@@ -48,8 +48,7 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
         {
             using Stream resource = typeof(HisenseMqttTransport).Assembly.GetManifestResourceStream(
                 "ControllerHelper.ThirdParty.Hisense." + name) ?? throw new InvalidOperationException(
-                    "В сборке отсутствуют локальные сертификаты и ключи клиента Hisense. " +
-                    "Добавьте материалы совместимости перед сборкой, как описано в README. Сетевое управление Hisense недоступно.");
+                    ControllerHelper.Localization.Text.Get("HisenseMqttTransport_106"));
             using StreamReader reader = new(resource);
             return reader.ReadToEnd();
         }
@@ -86,21 +85,21 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
             }
         }
         ErrorLog.Event("hisense.auth.exhausted", new { attempts = attempt, transportVersion = version, stage = "mqtt-connect-before-pin" });
-        throw new InvalidOperationException("Hisense отклонил подключение RemoteNOW/VIDAA до запроса PIN. Совместимый профиль подключения не найден; передайте папку logs. Этот ответ не определяет причину отказа и не означает, что управление выключено в настройках ТВ.");
+        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_107"));
     }
 
     public async Task ReconnectWithTokenAsync(HisenseAuthentication authentication, CancellationToken cancellation)
     {
         if (_settings is null || _address is null || Connection is null || authentication.ClientId != Connection.ClientId ||
             authentication.Method != Connection.Method || !authentication.IsValid())
-            throw new InvalidOperationException("Токен Hisense не соответствует текущему подключению.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_108"));
         if (_client is { IsConnected: true })
             await _client.DisconnectAsync(new MqttClientDisconnectOptions(), cancellation);
         _client?.Dispose(); _client = null;
         ErrorLog.Event("hisense.token.reconnect.begin", new { method = authentication.Method.ToString() });
         var credentials = HisenseAuthenticationProtocol.TokenCredentials(authentication, false, DateTimeOffset.UtcNow);
         if (!await TryConnectAsync(_settings, _address, _port, credentials, cancellation))
-            throw new InvalidOperationException("Hisense отклонил выданный токен при повторном подключении.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_109"));
         Connection = credentials;
         ErrorLog.Event("hisense.token.reconnect.ok");
     }
@@ -139,7 +138,7 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
             if (message.Payload.Length > 65536)
             {
                 ErrorLog.Event("hisense.mqtt.receive.rejected", new { connection = trace, topic, bytes = message.Payload.Length, reason = "payload-too-large" });
-                messages.Writer.TryComplete(new InvalidDataException("Ответ Hisense превышает допустимый размер."));
+                messages.Writer.TryComplete(new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_110")));
             }
             else
             {
@@ -152,7 +151,7 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
                 if (!queued)
                 {
                     ErrorLog.Event("hisense.mqtt.receive.rejected", new { connection = trace, topic, reason = "queue-full-or-closed" });
-                    messages.Writer.TryComplete(new InvalidDataException("Hisense отправляет слишком много сообщений."));
+                    messages.Writer.TryComplete(new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_111")));
                 }
             }
             return Task.CompletedTask;
@@ -164,7 +163,7 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
                 ErrorLog.Event("hisense.mqtt.disconnected", new { connection = trace, phase, reason = args.Reason.ToString(),
                     code = (int)args.Reason, wasConnected = args.ClientWasConnected, exceptionType = args.Exception?.GetType().FullName,
                     elapsedMs = Stopwatch.GetElapsedTime(started).TotalMilliseconds });
-                messages.Writer.TryComplete(new IOException("Соединение MQTT с Hisense закрыто.", args.Exception));
+                messages.Writer.TryComplete(new IOException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_112"), args.Exception));
             }
             return Task.CompletedTask;
         };
@@ -203,7 +202,7 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
             if (result.ResultCode is MqttClientConnectResultCode.NotAuthorized or MqttClientConnectResultCode.BadUserNameOrPassword or MqttClientConnectResultCode.UnsupportedProtocolVersion)
                 return false; // Only explicit credential rejection permits a different auth method.
             if (result.ResultCode != MqttClientConnectResultCode.Success)
-                throw new InvalidOperationException("Hisense отклонил MQTT-подключение: " + result.ResultCode);
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_113") + result.ResultCode);
             ErrorLog.Event("hisense.auth.connect-accepted", new { connection = trace, method = credentials.Method.ToString(), source = credentials.Source });
             phase = "subscribe";
             // The U7QF grants only PIN/token topics to a generated credential. The
@@ -235,13 +234,13 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
             ErrorLog.Event("hisense.mqtt.suback", new { connection = trace, subscriptionStage, packetId = subscribed.PacketIdentifier,
                 requested = topics.Length, received = results.Length, results, elapsedMs = Stopwatch.GetElapsedTime(subscribeStarted).TotalMilliseconds });
             if (results.Length != topics.Length)
-                throw new InvalidDataException("Hisense вернул неполный ответ MQTT на подписку. Подробности в logs.");
+                throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_114"));
             // Only a well-formed MQTT 3.x denial of a known non-required channel
             // is tolerated. PIN/token failures and post-token control failures
             // remain fatal, as do unknown response codes and legacy failures.
             var rejected = results.FirstOrDefault(item => !item.accepted && (item.requirement == "required" || item.code != 128));
             if (rejected is not null)
-                throw new InvalidOperationException($"Hisense отклонил обязательную подписку {rejected.topic}: {rejected.name} (код {rejected.code}, этап {subscriptionStage}). Подробности в logs.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Format("HisenseMqttTransport_115", rejected.topic, rejected.name, rejected.code, subscriptionStage));
             int acceptedCount = results.Count(item => item.accepted);
             if (acceptedCount != results.Length)
                 ErrorLog.Event("hisense.mqtt.subscribe.partial", new { connection = trace, subscriptionStage,
@@ -259,7 +258,7 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
                 canceled = error is OperationCanceledException, elapsedMs = Stopwatch.GetElapsedTime(started).TotalMilliseconds });
             if (error is OperationCanceledException) throw;
             ErrorLog.Write("hisense.mqtt." + phase, error);
-            if (rejectedCertificate) throw new TelevisionCertificateException("Сертификат Hisense изменился или просрочен. Повторите сопряжение и проверку сертификата.");
+            if (rejectedCertificate) throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_116"));
             throw;
         }
         finally
@@ -292,7 +291,7 @@ internal sealed class HisenseMqttTransport(Func<bool, bool, X509Certificate2>? c
         ErrorLog.Event("hisense.mqtt.publish.begin", new { connection = _connectionTrace, topic = label, bytes = System.Text.Encoding.UTF8.GetByteCount(payload), qos = 0 });
         try
         {
-            var result = await (_client ?? throw new InvalidOperationException("Нет подключения Hisense.")).PublishAsync(new MqttApplicationMessageBuilder().WithTopic(topic).WithPayload(payload)
+            var result = await (_client ?? throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseMqttTransport_117"))).PublishAsync(new MqttApplicationMessageBuilder().WithTopic(topic).WithPayload(payload)
                 .WithRetainFlag(false).Build(), cancellation);
             ErrorLog.Event("hisense.mqtt.publish.sent", new { connection = _connectionTrace, topic = label, confirmedByTv = false,
                 code = (int)result.ReasonCode, elapsedMs = Stopwatch.GetElapsedTime(started).TotalMilliseconds });

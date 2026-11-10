@@ -15,12 +15,14 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>ControllerHelper</AssemblyName>
     <RootNamespace>ControllerHelper</RootNamespace>
+    <Version>1.1.0</Version>
     <DefaultItemExcludes>$(DefaultItemExcludes);publish*/**;.work/**;.dotnet-cli/**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
     <EmbeddedResource Include="ThirdParty/Hisense/*_client.*" />
+    <EmbeddedResource Include="Localization/*.json" LogicalName="ControllerHelper.Localization.%(Filename)%(Extension)" />
     <Content Include="ThirdParty/Hisense/LICENSE*.txt" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="ThirdParty/Hisense/NOTICE.txt" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="controller.ico" CopyToOutputDirectory="PreserveNewest" />

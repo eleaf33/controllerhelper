@@ -9,34 +9,34 @@ internal sealed record OverlayPresentation(OverlayPrimaryAction PrimaryAction,
         OverlayPrimaryAction action = OverlayActionPolicy.Resolve(state);
         string primaryLabel = action switch
         {
-            OverlayPrimaryAction.PlayOnTv => "Играть на ТВ",
-            OverlayPrimaryAction.ReturnAndPowerOff => "Выключить телевизор и вернуться к мониторам",
-            OverlayPrimaryAction.ReturnToPc => "Вернуться к мониторам",
-            _ => "ТВ недоступен"
+            OverlayPrimaryAction.PlayOnTv => ControllerHelper.Localization.Text.Get("TrayIcon_022"),
+            OverlayPrimaryAction.ReturnAndPowerOff => ControllerHelper.Localization.Text.Get("OverlayPresentation_145"),
+            OverlayPrimaryAction.ReturnToPc => ControllerHelper.Localization.Text.Get("OverlayPresentation_146"),
+            _ => ControllerHelper.Localization.Text.Get("OverlayPresentation_147")
         };
         string primaryText = action switch
         {
-            OverlayPrimaryAction.PlayOnTv => "Играть\nна ТВ",
-            OverlayPrimaryAction.ReturnAndPowerOff => "Выключить ТВ\nи вернуться\nк мониторам",
-            OverlayPrimaryAction.ReturnToPc => "Вернуться к\nмониторам",
-            _ => "ТВ\nнедоступен"
+            OverlayPrimaryAction.PlayOnTv => ControllerHelper.Localization.Text.Get("OverlayPresentation_148"),
+            OverlayPrimaryAction.ReturnAndPowerOff => ControllerHelper.Localization.Text.Get("OverlayPresentation_149"),
+            OverlayPrimaryAction.ReturnToPc => ControllerHelper.Localization.Text.Get("OverlayPresentation_150"),
+            _ => ControllerHelper.Localization.Text.Get("OverlayPresentation_151")
         };
         string? warning = null;
         if (state.PowerControlSupported && !state.PowerOffOnReturn && !state.PowerCheckPending && state.WakeEnabled && state.PowerState == TelevisionPowerState.Unknown && state.TelevisionActive)
             warning = state.NetworkReachable
-                ? "Питание ТВ не определено: для выключения по сети сопрягите его во вкладке ТВ."
-                : "Питание ТВ не подтверждено. Вернуться к мониторам можно без сетевого выключения; проверьте сеть, сертификат и сопряжение ТВ.";
+                ? ControllerHelper.Localization.Text.Get("OverlayPresentation_152")
+                : ControllerHelper.Localization.Text.Get("OverlayPresentation_153");
         else if (action == OverlayPrimaryAction.None && state.PowerControlSupported && !state.PowerOffOnReturn && state.WakeEnabled)
             warning = state.NetworkReachable
-                ? "Не удалось определить состояние ТВ. Сопрягите его во вкладке ТВ."
-                : "Телевизор не отвечает по сети. Проверьте подключение.";
+                ? ControllerHelper.Localization.Text.Get("OverlayPresentation_154")
+                : ControllerHelper.Localization.Text.Get("OverlayPresentation_155");
 
         warning = state.ConnectionWarning ?? warning;
         return new OverlayPresentation(action, primaryLabel, primaryText,
-            state.MonitorsActive ? "Выключить мониторы" : "Включить мониторы",
-            state.MonitorsActive ? "Выключить\nмониторы" : "Включить\nмониторы",
-            state.TelevisionActive ? "Продолжить игру" : "Закрыть оверлей",
-            state.TelevisionActive ? "Продолжить\nигру" : "Закрыть\nоверлей",
+            state.MonitorsActive ? ControllerHelper.Localization.Text.Get("OverlayPresentation_156") : ControllerHelper.Localization.Text.Get("OverlayPresentation_157"),
+            state.MonitorsActive ? ControllerHelper.Localization.Text.Get("OverlayPresentation_158") : ControllerHelper.Localization.Text.Get("OverlayPresentation_159"),
+            state.TelevisionActive ? ControllerHelper.Localization.Text.Get("OverlayPresentation_160") : ControllerHelper.Localization.Text.Get("OverlayPresentation_161"),
+            state.TelevisionActive ? ControllerHelper.Localization.Text.Get("OverlayPresentation_162") : ControllerHelper.Localization.Text.Get("OverlayPresentation_163"),
             state.TelevisionActive, warning);
     }
 }

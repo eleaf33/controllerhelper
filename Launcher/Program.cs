@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 
 internal static class Program
 {
@@ -12,6 +14,7 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        bool russian = ReadRussianPreference();
         string root = AppDomain.CurrentDomain.BaseDirectory;
         string application = Path.Combine(root, "lib", "ControllerHelper.exe");
         string logPath = Path.Combine(root, "logs", "launcher.log");
@@ -21,7 +24,7 @@ internal static class Program
             // Report an unwritable package explicitly instead of silently losing diagnostics.
             WriteLog(logPath, "launcher.start");
             if (!File.Exists(application))
-                throw new FileNotFoundException("Не найден основной исполняемый файл приложения.", application);
+                throw new FileNotFoundException(russian ? "Не найден основной исполняемый файл приложения." : "The main application executable was not found.", application);
 
             var start = new ProcessStartInfo(application);
             start.WorkingDirectory = Path.GetDirectoryName(application);
@@ -30,7 +33,7 @@ internal static class Program
             using (Process process = Process.Start(start))
             {
                 if (process == null)
-                    throw new InvalidOperationException("Не удалось запустить приложение.");
+                    throw new InvalidOperationException(russian ? "Не удалось запустить приложение." : "Could not start the application.");
                 process.WaitForExit();
                 WriteLog(logPath, "application.exit code=" + process.ExitCode);
                 return process.ExitCode;
@@ -43,6 +46,33 @@ internal static class Program
             MessageBox(IntPtr.Zero, error.Message, "ControllerHelper", 0x10);
             return 1;
         }
+    }
+
+    [DataContract]
+    private sealed class LanguagePreference
+    {
+        [DataMember] public string Language { get; set; }
+    }
+
+    private static bool ReadRussianPreference()
+    {
+        string settings = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ControllerHelper", "settings.json");
+        foreach (string path in new[] { settings, settings + ".bak" })
+        {
+            try
+            {
+                if (!File.Exists(path) || new FileInfo(path).Length > 8 * 1024 * 1024) continue;
+                using (var stream = File.OpenRead(path))
+                {
+                    var value = (LanguagePreference)new DataContractJsonSerializer(typeof(LanguagePreference)).ReadObject(stream);
+                    if (value == null) continue;
+                    return value.Language != null && (value.Language.Equals("ru", StringComparison.OrdinalIgnoreCase) ||
+                        value.Language.StartsWith("ru-", StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is SerializationException) { }
+        }
+        return false;
     }
 
     private static void WriteLog(string path, string message)

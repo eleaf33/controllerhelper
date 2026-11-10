@@ -48,14 +48,14 @@ internal sealed class TrayIcon : IDisposable
         if (!SetWindowSubclass(_handle, _procedure, (nuint)1, 0))
         {
             if (_ownedIcon != 0) DestroyIcon(_ownedIcon);
-            throw new InvalidOperationException("Не удалось подключить значок к окну.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TrayIcon_019"));
         }
         if (!ShellNotifyIcon(0, ref _data))
         {
             StartupTrace.Write($"Shell_NotifyIcon failed: {Marshal.GetLastWin32Error()}, icon={_data.Icon}, custom={_ownedIcon != 0}");
             RemoveWindowSubclass(_handle, _procedure, (nuint)1);
             if (_ownedIcon != 0) DestroyIcon(_ownedIcon);
-            throw new InvalidOperationException("Не удалось добавить значок в трей.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TrayIcon_020"));
         }
     }
 
@@ -78,11 +78,11 @@ internal sealed class TrayIcon : IDisposable
         if (menu == 0) return;
         try
         {
-            AppendMenu(menu, 0, (nuint)1, "Настройки");
-            AppendMenu(menu, 0, (nuint)2, "Играть на ТВ");
-            AppendMenu(menu, 0, (nuint)3, "Вернуться к ПК");
+            AppendMenu(menu, 0, (nuint)1, ControllerHelper.Localization.Text.Get("TrayIcon_021"));
+            AppendMenu(menu, 0, (nuint)2, ControllerHelper.Localization.Text.Get("TrayIcon_022"));
+            AppendMenu(menu, 0, (nuint)3, ControllerHelper.Localization.Text.Get("TrayIcon_023"));
             AppendMenu(menu, 0x800, 0, null);
-            AppendMenu(menu, 0, (nuint)4, "Выход");
+            AppendMenu(menu, 0, (nuint)4, ControllerHelper.Localization.Text.Get("TrayIcon_024"));
             GetCursorPos(out CursorPoint point);
             SetForegroundWindow(_handle);
             uint choice = TrackPopupMenu(menu, 0x102, point.X, point.Y, 0, _handle, 0);

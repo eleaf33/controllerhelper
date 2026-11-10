@@ -21,7 +21,7 @@ public sealed class TelevisionWakeService
             address.AddressFamily != AddressFamily.InterNetwork ||
             address.Equals(IPAddress.Any) || address.Equals(IPAddress.Broadcast) ||
             IPAddress.IsLoopback(address) || address.GetAddressBytes()[0] >= 224)
-            throw new InvalidOperationException("Укажите корректный локальный IPv4-адрес телевизора.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionWakeService_191"));
         return address;
     }
 
@@ -29,7 +29,7 @@ public sealed class TelevisionWakeService
     {
         string hex = (value ?? string.Empty).Replace(":", "").Replace("-", "").Replace(" ", "");
         if (hex.Length != 12 || !hex.All(Uri.IsHexDigit))
-            throw new InvalidOperationException("Укажите MAC-адрес телевизора из 12 шестнадцатеричных цифр.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionWakeService_192"));
         return string.Join(":", Enumerable.Range(0, 6).Select(index => hex.Substring(index * 2, 2).ToUpperInvariant()));
     }
 
@@ -120,7 +120,7 @@ public sealed class TelevisionWakeService
             }
         }
         ErrorLog.Event("television.network.no-route", new { examined });
-        throw new InvalidOperationException("ПК и телевизор должны быть в одной локальной IPv4-сети без изоляции Wi-Fi.");
+        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionWakeService_193"));
     }
 
     private static string? ResolveMacAddress(IPAddress destination, IPAddress source)

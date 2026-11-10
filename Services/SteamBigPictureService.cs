@@ -9,7 +9,7 @@ public static class SteamBigPictureService
     {
         using RegistryKey? registration = Registry.ClassesRoot.OpenSubKey(@"steam\shell\open\command");
         if (registration?.GetValue(null) is not string command || string.IsNullOrWhiteSpace(command))
-            throw new InvalidOperationException("Steam не зарегистрирован в Windows. Установите или запустите клиент Steam.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SteamBigPictureService_174"));
     }
 
     public static void Open() => Send("steam://open/bigpicture");

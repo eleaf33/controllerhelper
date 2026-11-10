@@ -11,7 +11,7 @@ internal static class DisplayProfileCodec
     internal const int CurrentVersion = 1;
     internal const int MaximumPaths = 64;
     internal const int MaximumModes = 4096;
-    private const string Recovery = " Включите нужные экраны в параметрах Windows и сохраните профиль заново.";
+    private static string Recovery => ControllerHelper.Localization.Text.Get("DisplayProfileCodec_053");
 
     internal static DisplayProfile Capture(DisplayPath[] paths, DisplayMode[] modes, Func<DisplayTarget, string> identify)
     {
@@ -32,7 +32,7 @@ internal static class DisplayProfileCodec
     {
         ValidateVersion(profile);
         if (profile is not null && (profile.PathSize != Marshal.SizeOf<DisplayPath>() || profile.ModeSize != Marshal.SizeOf<DisplayMode>()))
-            throw Invalid("Формат структур сохранённого профиля несовместим с этой сборкой.");
+            throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_054"));
         DisplayPath[] paths = Decode<DisplayPath>(profile is null ? legacyPaths : profile.Paths, MaximumPaths);
         DisplayMode[] modes = Decode<DisplayMode>(profile is null ? legacyModes : profile.Modes, MaximumModes);
         ValidateStructure(paths, modes);
@@ -40,7 +40,7 @@ internal static class DisplayProfileCodec
         ValidateIds(ids, paths.Length);
         ValidateIds(expectedIds.ToArray(), paths.Length);
         if (!ids.ToHashSet(StringComparer.OrdinalIgnoreCase).SetEquals(expectedIds))
-            throw Invalid("Сохранённый профиль не соответствует выбранным дисплеям.");
+            throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_055"));
         for (int index = 0; index < paths.Length; index++)
         {
             DisplayPath saved = paths[index];
@@ -51,7 +51,7 @@ internal static class DisplayProfileCodec
                 SameAdapter(current.TargetInfo.AdapterId, saved.TargetInfo.AdapterId) &&
                 current.TargetInfo.Id == saved.TargetInfo.Id &&
                 string.Equals(identify(current.TargetInfo), ids[index], StringComparison.OrdinalIgnoreCase));
-            if (!found) throw Invalid("Дисплей недоступен или подключение видеокарты изменилось.");
+            if (!found) throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_056"));
         }
         DisplayProfile validated = profile?.Copy() ?? Capture(paths, modes, identify);
         return new DecodedDisplayProfile(paths, modes, validated);
@@ -60,7 +60,7 @@ internal static class DisplayProfileCodec
     internal static void ValidateVersion(DisplayProfile? profile)
     {
         if (profile is not null && profile.Version != CurrentVersion)
-            throw Invalid($"Версия профиля дисплеев {profile.Version} не поддерживается.");
+            throw Invalid(ControllerHelper.Localization.Text.Format("DisplayProfileCodec_057", profile.Version));
     }
 
     internal static AppSettings PreparePcForTelevision(AppSettings settings, DisplayPath[] activePaths,
@@ -84,7 +84,7 @@ internal static class DisplayProfileCodec
     {
         if (settings.TelevisionMode is null) ValidateVersion(settings.TvProfile);
         if (string.IsNullOrWhiteSpace(settings.TelevisionId))
-            throw new InvalidOperationException("Выберите телевизор.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_058"));
         try
         {
             return Read(settings.TvProfile, settings.TvPath, settings.TvModes,
@@ -110,13 +110,13 @@ internal static class DisplayProfileCodec
     internal static void ValidateStructure(DisplayPath[] paths, DisplayMode[] modes)
     {
         if (paths.Length is 0 or > MaximumPaths || modes.Length is 0 or > MaximumModes)
-            throw Invalid("Недопустимый размер сохранённой раскладки.");
+            throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_059"));
         HashSet<(int, uint, uint)> targets = [];
         foreach (DisplayPath path in paths)
         {
             if ((path.Flags & DisplayConfig.PathActive) == 0 ||
                 !targets.Add((path.TargetInfo.AdapterId.HighPart, path.TargetInfo.AdapterId.LowPart, path.TargetInfo.Id)))
-                throw Invalid("Профиль содержит неактивный или повторяющийся видеопуть.");
+                throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_060"));
             bool virtualMode = (path.Flags & DisplayConfig.PathSupportsVirtualMode) != 0;
             uint sourceIndex = virtualMode ? path.SourceInfo.ModeInfoIdx >> 16 : path.SourceInfo.ModeInfoIdx;
             DisplayMode source = RequireMode(sourceIndex, 1, path.SourceInfo.AdapterId, path.SourceInfo.Id);
@@ -124,7 +124,7 @@ internal static class DisplayProfileCodec
             int x = unchecked((int)(source.Data1 >> 32)), y = unchecked((int)(uint)source.Data2);
             if (width is 0 or > int.MaxValue || height is 0 or > int.MaxValue ||
                 (long)x + width > int.MaxValue || (long)y + height > int.MaxValue)
-                throw Invalid("Недопустимые размеры или положение дисплея.");
+                throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_061"));
             uint targetIndex = virtualMode ? path.TargetInfo.ModeInfoIdx >> 16 : path.TargetInfo.ModeInfoIdx;
             if (targetIndex != (virtualMode ? 0xFFFF : uint.MaxValue))
                 RequireMode(targetIndex, 2, path.TargetInfo.AdapterId, path.TargetInfo.Id);
@@ -134,10 +134,10 @@ internal static class DisplayProfileCodec
 
         DisplayMode RequireMode(uint index, uint type, AdapterLuid adapter, uint? id)
         {
-            if (index >= modes.Length) throw Invalid("Индекс режима выходит за границы сохранённого профиля.");
+            if (index >= modes.Length) throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_062"));
             DisplayMode mode = modes[index];
             if (mode.InfoType != type || !SameAdapter(mode.AdapterId, adapter) || (id is not null && mode.Id != id))
-                throw Invalid("Режим дисплея не соответствует видеопути.");
+                throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_063"));
             return mode;
         }
     }
@@ -146,7 +146,7 @@ internal static class DisplayProfileCodec
     {
         if (ids.Length != count || ids.Any(string.IsNullOrWhiteSpace) || ids.Any(id => id.Length > 1024) ||
             ids.Distinct(StringComparer.OrdinalIgnoreCase).Count() != count)
-            throw Invalid("Некорректный список дисплеев в профиле.");
+            throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_064"));
     }
 
     private static bool SameAdapter(AdapterLuid a, AdapterLuid b) => a.HighPart == b.HighPart && a.LowPart == b.LowPart;
@@ -155,12 +155,12 @@ internal static class DisplayProfileCodec
     {
         int size = Marshal.SizeOf<T>();
         if (string.IsNullOrWhiteSpace(encoded) || encoded.Length > ((maximumCount * size + 2) / 3) * 4)
-            throw Invalid("Сохранённая раскладка отсутствует или превышает допустимый размер.");
+            throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_065"));
         byte[] bytes;
         try { bytes = Convert.FromBase64String(encoded); }
-        catch (FormatException) { throw Invalid("Сохранённая раскладка содержит некорректные данные."); }
+        catch (FormatException) { throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_066")); }
         if (bytes.Length == 0 || bytes.Length % size != 0 || bytes.Length / size > maximumCount)
-            throw Invalid("Сохранённая раскладка дисплеев повреждена.");
+            throw Invalid(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_067"));
         return MemoryMarshal.Cast<byte, T>(bytes).ToArray();
     }
     private static InvalidOperationException Invalid(string reason) => new(reason + Recovery);

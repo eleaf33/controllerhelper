@@ -15,7 +15,7 @@ internal sealed partial class HisenseSession
             return HisensePowerOffResult.AlreadyOff;
         }
         if (power != TelevisionPowerState.On)
-            throw new InvalidOperationException("Hisense не подтвердил, что включён. Команда питания не отправлена, чтобы не включить уже спящий ТВ. Подробности в logs.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_Power_132"));
 
         cancellation.ThrowIfCancellationRequested();
         // ba.k.z / U in the tested APK: this is a toggle, not an idempotent OFF.
@@ -32,7 +32,7 @@ internal sealed partial class HisenseSession
                 {
                     var reply = await Receive([StateTopic, ResponseTopic("authentication")], token);
                     if (reply.Topic != StateTopic || RequiresAuthentication(reply.Payload))
-                        throw new InvalidOperationException("Hisense запросил сопряжение после команды питания.");
+                        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_Power_133"));
                     var state = ParsePowerState(reply.Payload);
                     ErrorLog.Event("hisense.power.off.observed", new { state = state.ToString() });
                     if (state == TelevisionPowerState.Off) return true;
@@ -72,9 +72,9 @@ internal sealed partial class HisenseSession
                 if (reply.Topic != StateTopic)
                 {
                     if (!reply.Retained && reply.Topic == ResponseTopic("authentication"))
-                        throw new InvalidOperationException("Hisense требует повторного сопряжения для выключения. Выполните его в настройках.");
+                        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_Power_134"));
                     if (!reply.Retained && reply.Topic == ResponseTopic("authenticationcodetoast"))
-                        throw new InvalidOperationException("Hisense сообщает, что управление занято другим устройством.");
+                        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_Power_135"));
                     return;
                 }
                 // A late delivery of the initial retained snapshot cannot replace
@@ -85,7 +85,7 @@ internal sealed partial class HisenseSession
                     return;
                 }
                 if (!reply.Retained && RequiresAuthentication(reply.Payload))
-                    throw new InvalidOperationException("Hisense требует повторного сопряжения для выключения. Выполните его в настройках.");
+                    throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_Power_134"));
                 state = ParsePowerState(reply.Payload);
                 liveSeen |= !reply.Retained;
                 source = reply.Retained ? "retained-broker-snapshot" : "live-event";
@@ -98,7 +98,7 @@ internal sealed partial class HisenseSession
             int count = 0;
             while (transport.TryRead(out var pending))
             {
-                if (++count > 64) throw new InvalidDataException("Слишком много обновлений состояния Hisense перед выключением.");
+                if (++count > 64) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseSession_Power_136"));
                 Observe(pending!);
             }
             ErrorLog.Event("hisense.power.state", new { state = state.Value.ToString(), source, queuedUpdates = count });

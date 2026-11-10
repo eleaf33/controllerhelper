@@ -67,7 +67,7 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
         cancellation.ThrowIfCancellationRequested();
         if (pin is null) throw new OperationCanceledException(cancellation);
         if (pin.Length != 4 || pin.Any(c => c < '0' || c > '9'))
-            throw new InvalidOperationException("Введите четыре цифры PIN с экрана Hisense.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_118"));
         await Stage("pair.pin", async token =>
         {
             transport.Drain();
@@ -79,7 +79,7 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
                 json.RootElement.TryGetProperty("result", out var result) && result.ValueKind == JsonValueKind.Number &&
                 result.TryGetInt32(out int value) && (value == 1 || value == 0 && transport.Connection?.MobileApp == true);
             ErrorLog.Event("hisense.pair.result", new { accepted });
-            if (!accepted) throw new InvalidOperationException("Hisense отклонил PIN. Повторите сопряжение.");
+            if (!accepted) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_119"));
         }, cancellation);
         if (transport.Connection is { Dynamic: true }) await RequestTokenAsync("", cancellation);
         else if (transport.Connection?.UsesRemoteNowCertificate == true) await Send("authenticationcodeclose", "", cancellation);
@@ -150,7 +150,7 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
     {
         var reply = await RequestSourcesOrAuthentication(cancellation);
         if (reply.Topic != ResponseTopic("sourcelist"))
-            throw new InvalidOperationException("Hisense требует PIN. Выполните сопряжение в настройках приложения.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_120"));
         return ParseInputs(reply.Payload);
     }
 
@@ -158,7 +158,7 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
     {
         var inputs = await GetInputsAsync(cancellation);
         HisenseInput selected = inputs.FirstOrDefault(input => input.Id == id)
-            ?? throw new InvalidOperationException("Сохранённый вход отсутствует в списке Hisense. Обновите список и выберите HDMI заново.");
+            ?? throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_121"));
         await Stage("input.select", async token =>
         {
             transport.Drain();
@@ -169,7 +169,7 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
             {
                 HisenseMessage reply = await Receive([StateTopic, ResponseTopic("authentication")], token);
                 if (reply.Topic == ResponseTopic("authentication") || RequiresAuthentication(reply.Payload))
-                    throw new InvalidOperationException("Hisense запросил повторное сопряжение при выборе HDMI.");
+                    throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_122"));
                 if (StateMatches(reply.Payload, selected.Id)) break;
             }
             ErrorLog.Event("hisense.input.confirmed");
@@ -190,9 +190,9 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
             bool relevant = expected.Contains(reply.Topic, StringComparer.Ordinal);
             ErrorLog.Event("hisense.mqtt.receive", new { kind = Kind(reply.Topic), bytes = reply.Payload.Length, retained = reply.Retained, relevant });
             if (!reply.Retained && reply.Topic == ResponseTopic("authenticationcodetoast"))
-                throw new InvalidOperationException("Hisense сообщает, что управление занято другим устройством. Закройте приложение-пульт на телефоне и повторите сопряжение.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_123"));
             if (pinPending && !reply.Retained && reply.Topic == ResponseTopic("authenticationcodeclose"))
-                throw new InvalidOperationException("Hisense закрыл окно PIN или срок кода истёк. Повторите сопряжение.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSession_124"));
             if (!reply.Retained && relevant) return reply;
         }
     }
@@ -202,7 +202,7 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
 
     internal static JsonDocument Parse(byte[] payload)
     {
-        if (payload.Length > 65536) throw new InvalidDataException("Слишком большой ответ Hisense.");
+        if (payload.Length > 65536) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseSession_125"));
         return JsonDocument.Parse(payload, new JsonDocumentOptions { MaxDepth = 16 });
     }
 
@@ -210,18 +210,18 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
     {
         using JsonDocument json = Parse(payload);
         if (json.RootElement.ValueKind != JsonValueKind.Array || json.RootElement.GetArrayLength() > 64)
-            throw new InvalidDataException("Неизвестный формат списка входов Hisense. Передайте логи разработчику.");
+            throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseSession_126"));
         List<HisenseInput> inputs = [];
         foreach (var entry in json.RootElement.EnumerateArray())
         {
             if (entry.ValueKind != JsonValueKind.Object || !entry.TryGetProperty("sourceid", out var id) ||
-                !entry.TryGetProperty("sourcename", out var name)) throw new InvalidDataException("Некорректный вход Hisense.");
+                !entry.TryGetProperty("sourcename", out var name)) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseSession_127"));
             string? value = Scalar(id), label = name.ValueKind == JsonValueKind.String ? name.GetString() : null;
             if (string.IsNullOrWhiteSpace(value) || value.Length > 64 || string.IsNullOrWhiteSpace(label) || label.Length > 128 ||
-                inputs.Any(i => i.Id == value)) throw new InvalidDataException("Некорректный или повторяющийся вход Hisense.");
+                inputs.Any(i => i.Id == value)) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseSession_128"));
             inputs.Add(new(value, label));
         }
-        if (inputs.Count == 0) throw new InvalidDataException("Hisense вернул пустой список входов.");
+        if (inputs.Count == 0) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseSession_129"));
         ErrorLog.Event("hisense.sources.parsed", new { count = inputs.Count });
         return inputs;
     }
@@ -254,7 +254,7 @@ internal sealed partial class HisenseSession(IHisenseTransport transport, string
         catch (OperationCanceledException) when (!cancellation.IsCancellationRequested)
         {
             ErrorLog.Event("hisense." + phase + ".timeout");
-            throw new TimeoutException("Hisense не ответил на этапе «" + phase + "». Подробности в logs/errors.jsonl.");
+            throw new TimeoutException(ControllerHelper.Localization.Text.Get("HisenseSession_130") + phase + ControllerHelper.Localization.Text.Get("HisenseSession_131"));
         }
         catch (OperationCanceledException) { ErrorLog.Event("hisense." + phase + ".canceled"); throw; }
         catch (Exception error) { ErrorLog.Write("hisense." + phase, error); throw; }

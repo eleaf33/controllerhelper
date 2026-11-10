@@ -20,6 +20,6 @@ internal static class LgInputSettings
     internal static void EnsureCurrent(TelevisionPairingTarget expected, string? key, AppSettings current)
     {
         if (expected != TelevisionPairingTarget.From(current) || key != current.TelevisionClientKey)
-            throw new InvalidOperationException("Параметры или сопряжение LG изменились. Обновите список входов заново.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("LgInputSettings_144"));
     }
 }

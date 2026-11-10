@@ -11,7 +11,7 @@ internal sealed record HisenseTarget(string Display, string Address, string Mac,
 
     internal void EnsureCurrent(AppSettings settings)
     {
-        if (From(settings) != this) throw new InvalidOperationException("Параметры Hisense изменились. Повторите подключение.");
+        if (From(settings) != this) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSettings_137"));
     }
 }
 
@@ -45,12 +45,12 @@ internal static class HisenseSettings
     internal static void Validate(AppSettings settings)
     {
         if (settings.TelevisionNetworkProvider != TelevisionNetworkProvider.Hisense)
-            throw new InvalidOperationException("Выберите сетевой профиль Hisense.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSettings_138"));
         TelevisionWakeService.ParseAddress(settings.HisenseIpAddress);
         if (settings.HisenseClientId is not { Length: >= 8 and <= 64 } client ||
             client.Any(c => !char.IsAsciiLetterOrDigit(c) && c != '_'))
-            throw new InvalidOperationException("Сначала выполните сопряжение Hisense.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSettings_139"));
         if (!WebOsSecurity.HasFingerprint(settings.HisenseCertificateSha256))
-            throw new InvalidOperationException("Сначала подтвердите сертификат Hisense при сопряжении.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("HisenseSettings_140"));
     }
 }

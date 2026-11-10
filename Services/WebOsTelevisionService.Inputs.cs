@@ -9,7 +9,7 @@ namespace ControllerHelper.Services;
 internal sealed record LgInput(string Id, string Name, bool? Connected = null, string? AppId = null)
 {
     public override string ToString() => string.IsNullOrEmpty(Id) ? Name :
-        $"{Name} ({Id})" + (Connected == false ? " — нет сигнала" : "");
+        $"{Name} ({Id})" + (Connected == false ? ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_219") : "");
 }
 
 public sealed partial class WebOsTelevisionService
@@ -27,14 +27,14 @@ public sealed partial class WebOsTelevisionService
         InputStage("input.select", async token =>
         {
             ValidateInputSettings(settings);
-            if (string.IsNullOrWhiteSpace(settings.LgInputId)) throw new InvalidOperationException("Выберите вход LG.");
+            if (string.IsNullOrWhiteSpace(settings.LgInputId)) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_220"));
             using ClientWebSocket socket = await _connect(settings, token);
             await RegisterAsync(socket, settings.TelevisionClientKey, token, inputControl: true, allowPairingPrompt: false);
             var inputs = await ReadInputsAsync(socket, token);
             // IDs come from this TV. An inactive Windows HDMI path may be reported
             // disconnected; it must remain selectable before the PC display switch.
             var selected = inputs.FirstOrDefault(input => input.Id == settings.LgInputId)
-                ?? throw new InvalidOperationException("Сохранённый вход отсутствует на LG. Обновите список входов и выберите HDMI компьютера заново.");
+                ?? throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_221"));
             if (selected.AppId is not null && inputs.Count(input => input.AppId == selected.AppId) != 1)
             {
                 ErrorLog.Event("lg.input.app-unavailable", new { reason = "ambiguous-input-app" });
@@ -82,8 +82,8 @@ public sealed partial class WebOsTelevisionService
         {
             ErrorLog.Write("lg.input.warning", error);
             return error is LgInputCommandException
-                ? error.Message + " Вывод Windows на ТВ продолжается. Подробности в logs."
-                : "LG не подтвердил переключение входа. Выберите HDMI компьютера пультом; проверьте выбранный вход и сопряжение в блоке LG. Подробности в logs.";
+                ? error.Message + ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_222")
+                : ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_223");
         }
     }
 
@@ -91,7 +91,7 @@ public sealed partial class WebOsTelevisionService
     {
         TelevisionNetworkSettings.RequireLg(settings);
         if (string.IsNullOrWhiteSpace(settings.TelevisionClientKey))
-            throw new InvalidOperationException("Сначала нажмите «Сопрячь телевизор» в блоке LG и подтвердите запрос на ТВ.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_224"));
         _ = WebOsSecurity.Endpoint(settings);
     }
 
@@ -114,25 +114,25 @@ public sealed partial class WebOsTelevisionService
     {
         if (payload.ValueKind != JsonValueKind.Object || !payload.TryGetProperty("devices", out var devices) ||
             devices.ValueKind != JsonValueKind.Array || devices.GetArrayLength() > 64)
-            throw new InvalidDataException("LG вернул неизвестный формат списка входов.");
+            throw new InvalidDataException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_225"));
         List<LgInput> inputs = [];
         foreach (var device in devices.EnumerateArray())
         {
             if (device.ValueKind != JsonValueKind.Object || !device.TryGetProperty("id", out var idValue) || idValue.ValueKind != JsonValueKind.String)
-                throw new InvalidDataException("LG вернул вход без идентификатора.");
+                throw new InvalidDataException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_226"));
             string id = idValue.GetString()!;
             string label = device.TryGetProperty("label", out var name) && name.ValueKind == JsonValueKind.String ? name.GetString()! : id;
             if (string.IsNullOrWhiteSpace(label)) label = id;
             if (string.IsNullOrWhiteSpace(id) || id.Length > 128 || id.Any(char.IsControl) || label.Length > 256 || label.Any(char.IsControl) ||
-                inputs.Any(input => input.Id == id)) throw new InvalidDataException("LG вернул некорректный или повторяющийся вход.");
+                inputs.Any(input => input.Id == id)) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_227"));
             bool? connected = device.TryGetProperty("connected", out var flag) && flag.ValueKind is JsonValueKind.True or JsonValueKind.False ? flag.GetBoolean() : null;
             string? appId = device.TryGetProperty("appId", out var app) && app.ValueKind == JsonValueKind.String ? app.GetString() : null;
             if (string.IsNullOrWhiteSpace(appId)) appId = null;
             if (appId is not null && (appId.Length > 256 || appId.Any(c => char.IsControl(c) || char.IsWhiteSpace(c))))
-                throw new InvalidDataException("LG вернул некорректный идентификатор приложения входа.");
+                throw new InvalidDataException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_228"));
             inputs.Add(new(id, label, connected, appId));
         }
-        if (inputs.Count == 0) throw new InvalidDataException("LG вернул пустой список входов.");
+        if (inputs.Count == 0) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_229"));
         ErrorLog.Event("lg.inputs.parsed", new { count = inputs.Count, connected = inputs.Count(input => input.Connected == true), withAppId = inputs.Count(input => input.AppId is not null) });
         return inputs;
     }
@@ -174,7 +174,7 @@ public sealed partial class WebOsTelevisionService
             return result;
         }
         catch (OperationCanceledException) when (!cancellation.IsCancellationRequested)
-        { ErrorLog.Event("lg." + phase + ".timeout"); throw new TimeoutException("LG не ответил при управлении входами. Проверьте питание, адрес и сопряжение. Подробности в logs."); }
+        { ErrorLog.Event("lg." + phase + ".timeout"); throw new TimeoutException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_Inputs_230")); }
         catch (OperationCanceledException) { ErrorLog.Event("lg." + phase + ".canceled"); throw; }
         catch (Exception error) { ErrorLog.Write("lg." + phase, error); throw; }
     }

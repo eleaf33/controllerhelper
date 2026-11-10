@@ -49,13 +49,13 @@ public sealed partial class WebOsTelevisionService
 
     private static LgInputCommandException InputResponseError(InputResponse result)
     {
-        string code = result.Code is int value ? $" (код {value})" : "";
+        string code = result.Code is int value ? ControllerHelper.Localization.Text.Format("WebOsTelevisionService_InputResponses_209", value) : "";
         return new(result.Reason switch
         {
-            "permission-denied" => "LG отказал в разрешении управления входом" + code + ". Повторите «Сопрячь телевизор» в блоке LG и подтвердите запрос на ТВ.",
-            "unsupported-method" => "LG не поддерживает команду выбора входа" + code + ".",
-            "invalid-response" => "LG вернул неизвестный ответ на команду входа. Успех не подтверждён.",
-            _ => "LG отклонил команду входа" + code + "."
+            "permission-denied" => ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_210") + code + ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_211"),
+            "unsupported-method" => ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_212") + code + ".",
+            "invalid-response" => ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_213"),
+            _ => ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_214") + code + "."
         });
     }
 
@@ -75,13 +75,13 @@ public sealed partial class WebOsTelevisionService
                 if (!result.Accepted)
                 {
                     ErrorLog.Event("lg.input.unconfirmed", new { reason = "state-query-failed", commandAccepted = true, code = result.Code });
-                    throw new LgInputCommandException("LG принял команду входа, но проверка активного источника недоступна" +
-                        (result.Code is int code ? $" (код {code})" : "") + "." +
-                        (result.Reason == "permission-denied" ? " Повторите сопряжение и подтвердите разрешение на ТВ." : ""));
+                    throw new LgInputCommandException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_215") +
+                        (result.Code is int code ? ControllerHelper.Localization.Text.Format("WebOsTelevisionService_InputResponses_209", code) : "") + "." +
+                        (result.Reason == "permission-denied" ? ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_216") : ""));
                 }
                 var payload = response.RootElement.GetProperty("payload");
                 if (!payload.TryGetProperty("appId", out var app) || app.ValueKind != JsonValueKind.String || string.IsNullOrEmpty(app.GetString()))
-                    throw new LgInputCommandException("LG принял команду, но не сообщил активный вход. Переключение не подтверждено.");
+                    throw new LgInputCommandException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_217"));
                 bool matches = app.GetString() == expectedAppId;
                 ErrorLog.Event("lg.input.observed", new { attempt, matches });
                 if (matches)
@@ -95,7 +95,7 @@ public sealed partial class WebOsTelevisionService
         catch (OperationCanceledException) when (!cancellation.IsCancellationRequested)
         {
             ErrorLog.Event("lg.input.unconfirmed", new { reason = "foreground-not-confirmed", commandAccepted = true });
-            throw new LgInputCommandException("LG принял команду, но не подтвердил выбранный HDMI за 4 секунды. Проверьте активный вход на телевизоре.");
+            throw new LgInputCommandException(ControllerHelper.Localization.Text.Get("WebOsTelevisionService_InputResponses_218"));
         }
     }
 }

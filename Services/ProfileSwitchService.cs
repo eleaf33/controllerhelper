@@ -10,11 +10,11 @@ public sealed class ProfileSwitchService(DisplayService displays, AudioService a
     private AppSettings PrepareTelevisionProfile(AppSettings settings)
     {
         if (string.IsNullOrWhiteSpace(settings.TelevisionId))
-            throw new InvalidOperationException("Выберите телевизор.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_058"));
         if (settings.MonitorIds.Contains(settings.TelevisionId, StringComparer.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Телевизор не должен входить в список мониторов ПК.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_080"));
         if (string.IsNullOrWhiteSpace(settings.TvAudioId))
-            throw new InvalidOperationException("Выберите устройство звука для телевизора.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("ProfileSwitchService_168"));
         AppSettings working = ErrorLog.Step("preflight.pc-profile", () => displays.PreparePcForTelevision(settings));
         ErrorLog.Step("preflight.tv-options", () => displays.ValidateTelevisionOptions(settings));
         if (settings.TelevisionMode is null) DisplayProfileCodec.ValidateVersion(settings.TvProfile);
@@ -66,7 +66,7 @@ public sealed class ProfileSwitchService(DisplayService displays, AudioService a
                 catch (Exception error)
                 {
                     throw new InvalidOperationException(
-                        $"{original.Message} Не удалось восстановить прежний профиль ТВ: {error.Message}",
+                        ControllerHelper.Localization.Text.Format("ProfileSwitchService_169", original.Message, error.Message),
                         new AggregateException(original, error));
                 }
             }
@@ -78,9 +78,9 @@ public sealed class ProfileSwitchService(DisplayService displays, AudioService a
     {
         ErrorLog.Event("preflight.pc.begin");
         if (!settings.HasPcProfile)
-            throw new InvalidOperationException("Сначала сохраните раскладку мониторов ПК.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_078"));
         if (string.IsNullOrWhiteSpace(settings.PcAudioId))
-            throw new InvalidOperationException("Выберите устройство звука для ПК.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("ProfileSwitchService_170"));
         ErrorLog.Step("preflight.audio-interface", audio.EnsureSwitchSupported);
         AppSettings working = settings.Copy();
         await Task.Run(() => ErrorLog.Step("preflight.pc-profile", () => displays.ValidatePcProfile(working)));

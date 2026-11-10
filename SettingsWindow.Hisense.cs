@@ -25,16 +25,16 @@ public sealed partial class SettingsWindow
     private void UpdateHisenseStatus()
     {
         HisensePairStatusText.Text = _settings.HisensePaired
-            ? "Сопряжение сохранено. Выберите HDMI из списка ТВ и сохраните настройки."
-            : "Hisense ещё не сопряжён. Пробуждение WoL работает независимо от сопряжения.";
+            ? ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_246")
+            : ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_247");
     }
 
     private void SetHisenseInputs(IReadOnlyList<HisenseInput> inputs)
     {
         string? selected = (HisenseInputBox.SelectedItem as HisenseInput)?.Id ?? _settings.HisenseInputId;
-        List<HisenseInput> choices = [new("", "Не переключать вход"), .. inputs];
+        List<HisenseInput> choices = [new("", ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_248")), .. inputs];
         if (!string.IsNullOrEmpty(selected) && !choices.Any(i => i.Id == selected))
-            choices.Add(new(selected, (_settings.HisenseInputName ?? "Сохранённый вход") + " (обновите список)"));
+            choices.Add(new(selected, (_settings.HisenseInputName ?? ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_249")) + ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_250")));
         HisenseInputBox.ItemsSource = choices;
         HisenseInputBox.SelectedItem = choices.FirstOrDefault(i => i.Id == selected) ?? choices[0];
     }
@@ -54,10 +54,10 @@ public sealed partial class SettingsWindow
         try
         {
             if (_switching || _profileOperations.IsStopping)
-                throw new InvalidOperationException("Дождитесь завершения переключения экранов.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_251"));
             CommitSettings(ReadSelections());
             if (_settings.TelevisionNetworkProvider != TelevisionNetworkProvider.Hisense)
-                throw new InvalidOperationException("Выберите Hisense в поле сетевого управления ТВ.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_252"));
             TelevisionWakeService.ParseAddress(_settings.HisenseIpAddress);
             _hisenseCancellation = cancellation;
             PairHisenseButton.IsEnabled = RefreshHisenseInputsButton.IsEnabled = TestHisenseWakeButton.IsEnabled = false;
@@ -69,7 +69,7 @@ public sealed partial class SettingsWindow
         catch (OperationCanceledException)
         {
             ErrorLog.Event(name + ".canceled");
-            StatusText.Text = "Операция Hisense отменена. Изображение не переключалось.";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_253");
         }
         catch (Exception error)
         {
@@ -87,15 +87,15 @@ public sealed partial class SettingsWindow
     private async void TestHisenseWake_Click(object sender, RoutedEventArgs args) =>
         await RunHisenseSetupAsync("hisense.wake-test", async (settings, token) =>
         {
-            StatusText.Text = "Отправка пакетов пробуждения Hisense…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_254");
             await _televisionWake.SendWakeAsync(settings, token);
             if (!string.IsNullOrWhiteSpace(settings.TelevisionId))
             {
-                StatusText.Text = "WoL отправлен. Наблюдение за доступностью HDMI до 30 секунд; экраны не переключаются…";
+                StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_255");
                 await Task.Run(() => new TelevisionReadiness().WaitUntilReady(() => _displays.IsTelevisionAvailable(settings.TelevisionId), token), token);
-                StatusText.Text = "WoL отправлен; Windows видит HDMI телевизора. Проверьте изображение на ТВ: доступность HDMI не подтверждает питание экрана. Экраны ПК не переключались.";
+                StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_256");
             }
-            else StatusText.Text = "Пакеты WoL отправлены. Выберите телевизор для проверки HDMI; отправка пакетов не подтверждает включение ТВ.";
+            else StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_257");
         });
 
     private void CancelHisense_Click(object sender, RoutedEventArgs args) => _hisenseCancellation?.Cancel();
@@ -110,22 +110,22 @@ public sealed partial class SettingsWindow
                 CommitHisenseSettings(settings);
             }
             HisenseTarget expected = HisenseTarget.From(settings);
-            StatusText.Text = "Проверка сертификата включённого Hisense…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_258");
             TelevisionCertificate certificate = await HisenseSession.Stage("tls.probe", ct =>
                 TelevisionCertificateProbe.ReadEndpointAsync(TelevisionWakeService.ParseAddress(settings.HisenseIpAddress).ToString(), HisenseMqttTransport.Port, ct), token);
             token.ThrowIfCancellationRequested();
             expected.EnsureCurrent(_settings);
             if (DateTimeOffset.UtcNow < certificate.NotBefore || DateTimeOffset.UtcNow > certificate.NotAfter)
-                throw new TelevisionCertificateException("Сертификат Hisense просрочен или ещё не действует. Проверьте время ПК и прошивку ТВ.");
+                throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_259"));
             if (certificate.Sha256 != WebOsSecurity.NormalizeFingerprint(settings.HisenseCertificateSha256))
             {
                 ContentDialog trust = new()
                 {
                     XamlRoot = ((FrameworkElement)Content).XamlRoot,
-                    Title = "Сертификат Hisense",
+                    Title = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_260"),
                     Content = new TextBlock { TextWrapping = TextWrapping.Wrap, IsTextSelectionEnabled = true,
-                        Text = $"Адрес: {settings.HisenseIpAddress}\nSHA-256: {certificate.Sha256}\n\nПодтвердите, что это ваш ТВ в доверенной локальной сети. При замене сертификата потребуется повторное сопряжение.", MaxWidth = 380 },
-                    PrimaryButtonText = "Доверять", CloseButtonText = "Отмена", DefaultButton = ContentDialogButton.Close
+                        Text = ControllerHelper.Localization.Text.Format("SettingsWindow_Hisense_261", settings.HisenseIpAddress, certificate.Sha256), MaxWidth = 380 },
+                    PrimaryButtonText = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_262"), CloseButtonText = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_263"), DefaultButton = ContentDialogButton.Close
                 };
                 if (await ShowHisenseDialog(trust, token) != ContentDialogResult.Primary) throw new OperationCanceledException(token);
                 expected.EnsureCurrent(_settings);
@@ -137,16 +137,16 @@ public sealed partial class SettingsWindow
                 settings = updated.Copy();
                 expected = HisenseTarget.From(settings);
             }
-            StatusText.Text = "Подключение RemoteNOW и запрос PIN…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_264");
             using HisenseSession session = _hisenseService.CreateSession(settings);
             await session.ConnectAsync(settings, token);
             var inputs = await session.PairAsync(async ct =>
             {
-                PasswordBox pin = new() { MaxLength = 4, Header = "Четыре цифры с экрана телевизора" };
+                PasswordBox pin = new() { MaxLength = 4, Header = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_265") };
                 ContentDialog dialog = new()
                 {
                     XamlRoot = ((FrameworkElement)Content).XamlRoot, Title = "PIN Hisense", Content = pin,
-                    PrimaryButtonText = "Подтвердить", CloseButtonText = "Отмена", DefaultButton = ContentDialogButton.Primary
+                    PrimaryButtonText = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_266"), CloseButtonText = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_263"), DefaultButton = ContentDialogButton.Primary
                 };
                 return await ShowHisenseDialog(dialog, ct) == ContentDialogResult.Primary ? pin.Password : null;
             }, token);
@@ -159,7 +159,7 @@ public sealed partial class SettingsWindow
             paired.HisensePaired = true;
             CommitHisenseSettings(paired);
             SetHisenseInputs(inputs);
-            StatusText.Text = "Hisense сопряжён. Выберите HDMI компьютера и нажмите «Сохранить настройки».";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_267");
         });
 
     private async void RefreshHisenseInputs_Click(object sender, RoutedEventArgs args) =>
@@ -167,7 +167,7 @@ public sealed partial class SettingsWindow
         {
             HisenseSettings.Validate(settings);
             HisenseTarget expected = HisenseTarget.From(settings);
-            StatusText.Text = "Получение входов Hisense…";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_268");
             using HisenseSession session = _hisenseService.CreateSession(settings);
             await session.ConnectAsync(settings, token);
             var inputs = await session.GetInputsAsync(token);
@@ -177,7 +177,7 @@ public sealed partial class SettingsWindow
             session.ApplyConnectionSettings(updated);
             CommitHisenseSettings(updated);
             SetHisenseInputs(inputs);
-            StatusText.Text = "Входы получены от Hisense. Выберите HDMI компьютера и сохраните настройки.";
+            StatusText.Text = ControllerHelper.Localization.Text.Get("SettingsWindow_Hisense_269");
         });
 
     private async Task<ContentDialogResult> ShowHisenseDialog(ContentDialog dialog, CancellationToken cancellation)

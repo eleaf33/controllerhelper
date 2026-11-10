@@ -10,7 +10,9 @@ ControllerHelper is a Windows 11 application for switching between a desktop mon
 
 [Latest Windows x64 release](https://github.com/eleaf33/controllerhelper/releases/latest) — download `ControllerHelper-…-win-x64.zip`, extract the **entire archive**, and run the top-level `ControllerHelper.exe`. No separate .NET installation is required. Logs are created automatically in `logs` beside the EXE. The release includes `SHA256SUMS.txt` for checking the archive's integrity.
 
-**The public build does not include Hisense private keys.** Hisense MQTT pairing, input selection, and power-off are unavailable in this build; these features require a local build with the materials described below. Display and audio switching, Wake-on-LAN, and LG control do not require these keys. The application interface is currently in Russian; the language links above switch the project documentation.
+**The public build does not include Hisense private keys.** Hisense MQTT pairing, input selection, and power-off are unavailable in this build; these features require a local build with the materials described below. Display and audio switching, Wake-on-LAN, and LG control do not require these keys.
+
+The application supports **English and Russian**. English is the default, including when upgrading settings that do not contain a language preference. To change it, open **PC → Language / Язык**, select a language, click **Save settings**, exit through the tray, and restart ControllerHelper. The documentation language links above are independent of the application setting. Device names and messages supplied by Windows or drivers may follow the system language.
 
 ## Features
 
@@ -24,6 +26,7 @@ ControllerHelper is a Windows 11 application for switching between a desktop mon
 - Open an installed Flydigi Space Station client within the overlay area and control the cursor with a gamepad.
 - Configure an overlay button combination and a separate emergency return-to-monitors combination.
 - Automatically write diagnostic logs to `logs` beside the top-level EXE.
+- English and Russian settings, overlay, tray menu, pairing dialogs, status messages, and application errors.
 
 ## How it works
 
@@ -94,7 +97,9 @@ publish-controllerhelper/
 
 Launch arguments: `--overlay` opens the overlay, `--to-tv` switches to the TV, and `--to-pc` returns to the PC. Launching without arguments opens settings.
 
-The last full verification before the initial source publication passed **346/346 tests**, with no Release build warnings or errors. Automated tests cover application logic, local TLS/MQTT scenarios, and the build; they do not guarantee compatibility with specific hardware. The latest Flydigi opening change still requires visual verification on the target PC.
+Verification of the bilingual version passes **352/352 tests**, including translation coverage, matching format arguments, language persistence, and date/number formatting. Automated tests cover application logic, local TLS/MQTT scenarios, and the build; they do not guarantee compatibility with specific hardware. The latest Flydigi opening change still requires visual verification on the target PC.
+
+English UI strings were checked with the LibreOffice English (US) spelling dictionary and reviewed in context. Terminology references and translation rules are recorded in [Localization/GLOSSARY.txt](Localization/GLOSSARY.txt).
 
 ### Local Hisense materials
 
@@ -120,6 +125,7 @@ A build made with local keys embeds them in application resources. Do not publis
 | `Services/` | Profile switching, audio, controllers, TVs, Steam, and Flydigi |
 | `Native/` | Windows API and GameInput declarations |
 | `Models/` | Settings and saved configuration models |
+| `Localization/` | English/Russian resources, language selection, and terminology |
 | `Launcher/` | Top-level EXE and launch log |
 | `Build/` | Dependency restore and publication preparation |
 | `Tests/` | Automated checks |

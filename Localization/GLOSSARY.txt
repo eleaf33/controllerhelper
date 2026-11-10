@@ -1,0 +1,49 @@
+ControllerHelper English / Russian terminology and review
+Reviewed 2026-11-11. English (US) is the default; Russian remains available.
+
+display = дисплей / экран
+monitor = монитор (the PC desktop displays)
+TV = телевизор / ТВ
+display layout = раскладка дисплеев
+resolution = разрешение
+refresh rate = частота обновления
+scaling = масштаб
+audio output = аудиовыход
+pair / pairing = сопрячь / сопряжение
+standby = режим ожидания
+wake = пробуждение / включение из режима ожидания
+input = вход (the TV source, such as HDMI)
+overlay = оверлей
+D-pad = крестовина
+stick = стик
+shortcut = сочетание кнопок / ярлык (depending on context)
+certificate fingerprint = отпечаток сертификата
+unencrypted = без шифрования
+
+Terminology references:
+https://dictionary.cambridge.org/dictionary/english/standby
+https://dictionary.cambridge.org/dictionary/english/overlay
+https://www.oxfordlearnersdictionaries.com/definition/english/refresh-rate
+https://support.microsoft.com/en-gb/windows/hardware/bluetooth/pair-a-bluetooth-device-in-windows
+https://support.microsoft.com/en-au/windows/hardware/bluetooth/fix-bluetooth-connected-but-no-sound-issue-on-windows
+https://learn.microsoft.com/en-us/azure/app-service/overview-tls
+
+All English resource values were spell-checked using WeCantSpell.Hunspell 7.0.1
+and the LibreOffice en_US dictionary, then reviewed in their UI/message context.
+The dictionary and checker are development-only tools, not app dependencies.
+Dictionary: https://github.com/LibreOffice/dictionaries/tree/master/en
+en_US.dic SHA-256: f0b1a234bd178bdd01875b2a392a9647f888b8fe879f79c52aae62c2759b3647
+en_US.aff SHA-256: e746c882dd6f303c2c46e7452804b9201115a6942cfeb15f18f8edf774d2e24e
+Reviewed exceptions are product/protocol names (ControllerHelper, Flydigi,
+Hisense, VIDAA, RemoteNOW, webOS, GameInput, HDMI, MQTT, TLS), abbreviations,
+MAC/model example fragments (EE, QF), and the technical term "unencrypted".
+
+Translation rules:
+- Preserve resource keys and numbered format arguments, including :X and :d.
+- Preserve leading/trailing spaces in message fragments and deliberate newlines.
+- Do not translate device names, TV-provided input names, identifiers, commands,
+  network payloads, log event IDs, or third-party names.
+- User-visible errors belong in both catalogs; diagnostics event IDs stay stable.
+- Application language is separate from numeric formatting used by protocols.
+- A language change is saved with settings and takes effect after restarting.
+- Windows/driver-provided messages may follow the operating system language.

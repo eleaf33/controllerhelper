@@ -5,7 +5,7 @@ namespace ControllerHelper.Services;
 
 public sealed record DisplayDevice(string Id, string Name, bool IsActive)
 {
-    public override string ToString() => $"{Name}{(IsActive ? " (активен)" : "")}";
+    public override string ToString() => $"{Name}{(IsActive ? ControllerHelper.Localization.Text.Get("DisplayService_070") : "")}";
 }
 
 internal sealed record DisplayTopologySnapshot(DisplayPath[] Paths, DisplayMode[] Modes);
@@ -50,7 +50,7 @@ public sealed class DisplayService
                 DisplayPath first = group.First();
                 string name = DisplayConfig.Describe(first.TargetInfo).Name;
                 return new DisplayDevice(group.Key,
-                    $"{(string.IsNullOrWhiteSpace(name) ? "Экран" : name)} · {first.TargetInfo.AdapterId.LowPart:X4}:{first.TargetInfo.Id}",
+                    $"{(string.IsNullOrWhiteSpace(name) ? ControllerHelper.Localization.Text.Get("DisplayService_071") : name)} · {first.TargetInfo.AdapterId.LowPart:X4}:{first.TargetInfo.Id}",
                     group.Any(path => (path.Flags & DisplayConfig.PathActive) != 0));
             }).ToArray();
     }
@@ -61,7 +61,7 @@ public sealed class DisplayService
         HashSet<string> selected = new(settings.MonitorIds, StringComparer.OrdinalIgnoreCase);
         DisplayPath[] pcPaths = paths.Where(path => selected.Contains(DisplayConfig.Key(path.TargetInfo))).ToArray();
         if (selected.Count == 0 || pcPaths.Length != selected.Count)
-            throw new InvalidOperationException("Сначала включите все выбранные мониторы в настройках Windows и сохраните раскладку ПК.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_072"));
         DisplayProfileCodec.StorePc(settings, DisplayProfileCodec.Capture(pcPaths, modes, DisplayConfig.Key));
     }
 
@@ -78,7 +78,7 @@ public sealed class DisplayService
         DisplayPath[] selected = paths.Where(path =>
             string.Equals(DisplayConfig.Key(path.TargetInfo), settings.TelevisionId, StringComparison.OrdinalIgnoreCase)).ToArray();
         if (selected.Length != 1)
-            throw new InvalidOperationException("Сначала включите выбранный телевизор в параметрах дисплея Windows, затем сохраните его раскладку.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_073"));
         DisplayProfileCodec.StoreTv(settings, DisplayProfileCodec.Capture(selected, modes, DisplayConfig.Key));
     }
 
@@ -86,11 +86,11 @@ public sealed class DisplayService
     {
         if (settings.TelevisionMode is null) DisplayProfileCodec.ValidateVersion(settings.TvProfile);
         if (string.IsNullOrWhiteSpace(settings.TelevisionId))
-            throw new InvalidOperationException("Выберите телевизор.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_058"));
         if (TelevisionNetworkSettings.WakeEnabled(settings))
             new TelevisionReadiness().WaitUntilReady(() => IsTelevisionAvailable(settings.TelevisionId), cancellation);
         else if (!IsTelevisionAvailable(settings.TelevisionId))
-            throw new InvalidOperationException("Телевизор сейчас не подключён или недоступен.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_074"));
 
         cancellation.ThrowIfCancellationRequested();
         var (active, activeModes) = DisplayConfig.Query(DisplayConfig.ActivePaths);
@@ -113,7 +113,7 @@ public sealed class DisplayService
             {
                 DisplayPath[] candidates = availablePaths.Where(candidate => candidate.TargetInfo.TargetAvailable != 0 &&
                     DisplayConfig.Key(candidate.TargetInfo).Equals(settings.TelevisionId, StringComparison.OrdinalIgnoreCase)).ToArray();
-                if (candidates.Length == 0) throw new InvalidOperationException("Телевизор больше не доступен.");
+                if (candidates.Length == 0) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_075"));
                 cancellation.ThrowIfCancellationRequested();
                 DisplayConfig.ActivateSingleTarget(candidates[0]);
                 return;
@@ -124,10 +124,10 @@ public sealed class DisplayService
         }
 
         if (!DisplayConfig.Key(path.TargetInfo).Equals(settings.TelevisionId, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Подключение телевизора изменилось. Включите его в Windows и повторно сохраните профиль.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_076"));
         int sourceModeIndex = SourceModeIndex(path);
         if (sourceModeIndex < 0 || sourceModeIndex >= modes.Length || modes[sourceModeIndex].InfoType != 1)
-            throw new InvalidOperationException("Режим телевизора недоступен. Включите его в Windows и повторно сохраните профиль.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_077"));
         modes[sourceModeIndex].Data1 &= uint.MaxValue;
         modes[sourceModeIndex].Data2 &= 0xFFFFFFFF00000000UL;
         cancellation.ThrowIfCancellationRequested();
@@ -145,7 +145,7 @@ public sealed class DisplayService
 
     private static DecodedDisplayProfile ReadPcProfile(AppSettings settings, bool requireAvailable = true, bool allowSourceRemap = false)
     {
-        if (!settings.HasPcProfile) throw new InvalidOperationException("Сначала сохраните раскладку мониторов ПК.");
+        if (!settings.HasPcProfile) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_078"));
         var (available, _) = DisplayConfig.Query(DisplayConfig.AllPaths);
         return DisplayProfileCodec.Read(settings.PcProfile, settings.PcPaths, settings.PcModes, settings.MonitorIds,
             available, DisplayConfig.Key, allowSourceRemap, requireAvailable);
@@ -189,14 +189,14 @@ public sealed class DisplayService
     public bool ToggleMonitors(AppSettings settings)
     {
         if (settings.MonitorIds.Count == 0 || !settings.HasPcProfile)
-            throw new InvalidOperationException("Сначала сохраните раскладку мониторов ПК.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_078"));
         var (activePaths, activeModes) = DisplayConfig.Query(DisplayConfig.ActivePaths);
         HashSet<string> monitorIds = new(settings.MonitorIds, StringComparer.OrdinalIgnoreCase);
         if (!activePaths.Any(path => DisplayConfig.Key(path.TargetInfo)
             .Equals(settings.TelevisionId, StringComparison.OrdinalIgnoreCase)))
-            throw new InvalidOperationException("Телевизор должен быть включён, чтобы переключать мониторы.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_079"));
         if (monitorIds.Contains(settings.TelevisionId ?? string.Empty))
-            throw new InvalidOperationException("Телевизор не должен входить в список мониторов ПК.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_080"));
 
         if (activePaths.Any(path => monitorIds.Contains(DisplayConfig.Key(path.TargetInfo))))
         {
@@ -243,7 +243,7 @@ public sealed class DisplayService
                 : candidates.Where(candidate => !usedSources.Contains((group.Key.High, group.Key.Low, candidate)))
                     .Select(candidate => (uint?)candidate).FirstOrDefault();
             if (sourceId is null)
-                throw new InvalidOperationException("Видеокарта не предоставляет свободный источник изображения для мониторов при включённом ТВ.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_081"));
             usedSources.Add((group.Key.High, group.Key.Low, sourceId.Value));
 
             foreach (var (saved, savedIndex) in group)
@@ -271,7 +271,7 @@ public sealed class DisplayService
         {
             if (copiedModes.TryGetValue(savedIndex, out int existing)) return existing;
             if (savedIndex < 0 || savedIndex >= savedModes.Length)
-                throw new InvalidOperationException("Сохранённая раскладка дисплеев повреждена.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_067"));
             DisplayMode mode = savedModes[savedIndex];
             if (sourceMode && mode.InfoType == 1)
             {
@@ -333,7 +333,7 @@ public sealed class DisplayService
     {
         int index = SourceModeIndex(path);
         if (index < 0 || index >= modes.Length || modes[index].InfoType != 1)
-            throw new InvalidOperationException("Не удалось определить положение одного из активных экранов.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayService_082"));
         return modes[index];
     }
 

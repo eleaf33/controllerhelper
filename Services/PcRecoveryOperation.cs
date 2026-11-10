@@ -12,7 +12,7 @@ internal static class PcRecoveryOperation
         cancellation.ThrowIfCancellationRequested();
         try { await Task.Run(() => ErrorLog.Step("recovery.audio", () => restoreAudio(cancellation))); }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { throw; }
-        catch (Exception error) { ErrorLog.Write("recovery.audio", error); warnings.Add($"Звук: {error.Message}"); }
+        catch (Exception error) { ErrorLog.Write("recovery.audio", error); warnings.Add(ControllerHelper.Localization.Text.Format("PcRecoveryOperation_164", error.Message)); }
         cancellation.ThrowIfCancellationRequested();
         try { await Task.Run(closeSteam); }
         catch (Exception error) { ErrorLog.Write("recovery.steam", error); warnings.Add($"Steam: {error.Message}"); }

@@ -9,6 +9,9 @@
   <ItemGroup>
     <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
     <Compile Include="Program.cs" />
+    <Compile Include="LocalizationTests.cs" />
+    <Compile Include="../Localization/Text.cs" Link="Localization/Text.cs" />
+    <EmbeddedResource Include="../Localization/*.json" LogicalName="ControllerHelper.Localization.%(Filename)%(Extension)" />
     <Compile Include="HisenseMqttTests.cs" />
     <Compile Include="HisenseTestCertificates.cs" />
     <Compile Include="HisenseAuthenticationTests.cs" />

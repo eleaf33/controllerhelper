@@ -15,9 +15,7 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
         {
             using RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop");
             if (key?.GetValue("Win8DpiScaling") is int custom && custom == 1)
-                return "В Windows включён общий пользовательский масштаб. Для масштаба только ТВ отключите " +
-                    "пользовательский масштаб в параметрах экрана Windows, выйдите и снова войдите в учётную запись. " +
-                    "Либо выберите «Не изменять»; разрешение и частота ТВ будут применяться отдельно.";
+                return ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_231");
             return null;
         }
     }
@@ -56,7 +54,7 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
             modes.Add(mode);
         }
         if (modes.Count == 0)
-            throw new InvalidOperationException("Windows не вернула режимы выбранного ТВ. Включите ТВ и обновите список.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_232"));
         return modes.Distinct().OrderByDescending(mode => (long)mode.Width * mode.Height)
             .ThenByDescending(mode => mode.Width).ThenByDescending(mode => mode.Frequency).ThenBy(mode => mode.Interlaced).ToArray();
     }
@@ -66,7 +64,7 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
         string name = SourceName(ActivePath(televisionId, exclusive: false).SourceInfo);
         var mode = DisplayVideoNative.DevMode.Create();
         if (!DisplayVideoNative.EnumModes(name, -1, ref mode, 0))
-            throw new InvalidOperationException("Не удалось прочитать текущий режим ТВ.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_233"));
         return Convert(mode);
     }
 
@@ -85,7 +83,7 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
         if (result != 0) throw ModeError(result);
         // Re-resolve after test: never let an old GDI name mutate another screen.
         if (name != SourceName(ActivePath(televisionId, exclusive: true).SourceInfo))
-            throw new InvalidOperationException("Подключение ТВ изменилось во время проверки режима.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_234"));
         result = DisplayVideoNative.ChangeMode(name, ref native, 0, 0, 0);
         if (result != 0) throw ModeError(result);
     }
@@ -96,9 +94,9 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
         var path = ActivePath(televisionId, exclusive: false);
         var request = new DisplayVideoNative.DpiGet { Header = Header(path.SourceInfo, unchecked((uint)-3), 32) };
         if (Marshal.SizeOf<DisplayVideoNative.DpiGet>() != 32 || Marshal.SizeOf<DisplayVideoNative.DpiSet>() != 24)
-            throw new NotSupportedException("Эта сборка не поддерживает изменение масштаба Windows.");
+            throw new NotSupportedException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_235"));
         int result = DisplayVideoNative.GetDpi(ref request);
-        if (result != 0) throw new Win32Exception(result, "Windows не поддерживает чтение масштаба этого ТВ.");
+        if (result != 0) throw new Win32Exception(result, ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_236"));
         var scale = new DisplayScaleRange(request.Minimum, request.Current, request.Maximum);
         scale.Validate();
         return scale;
@@ -108,16 +106,16 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
     {
         DisplayScaleRange scale = GetScale(televisionId);
         if (relative < scale.MinimumRelative || relative > scale.MaximumRelative)
-            throw new InvalidOperationException("Выбранный масштаб недоступен при текущем разрешении ТВ.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_237"));
         var path = ActivePath(televisionId, exclusive: true);
         var request = new DisplayVideoNative.DpiSet
         {
             Header = Header(path.SourceInfo, unchecked((uint)-4), 24), Relative = relative
         };
         int result = DisplayVideoNative.SetDpi(ref request);
-        if (result != 0) throw new Win32Exception(result, "Windows не применила масштаб ТВ.");
+        if (result != 0) throw new Win32Exception(result, ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_238"));
         if (GetScale(televisionId).CurrentRelative != relative)
-            throw new InvalidOperationException("Windows не подтвердила изменение масштаба ТВ.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_239"));
     }
 
     private static DisplayDeviceHeader Header(DisplaySource source, uint type, uint size) =>
@@ -127,20 +125,20 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
         new(checked((int)mode.Width), checked((int)mode.Height), checked((int)mode.Frequency), (mode.Flags & 2) != 0);
 
     private static Exception ModeError(int result) => new InvalidOperationException(
-        $"Windows отклонила режим ТВ (код {result}). Выберите другое разрешение или частоту; прежняя раскладка будет восстановлена.");
+        ControllerHelper.Localization.Text.Format("WindowsTelevisionDisplayApi_240", result));
 
     private static DisplayPath ActivePath(string televisionId, bool exclusive)
     {
         var (paths, _) = DisplayConfig.Query(DisplayConfig.ActivePaths);
         var matches = paths.Where(path => string.Equals(DisplayConfig.Key(path.TargetInfo), televisionId, StringComparison.OrdinalIgnoreCase)).ToArray();
         if (matches.Length != 1)
-            throw new InvalidOperationException("Для чтения этих параметров включите выбранный ТВ в Windows и обновите список.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_241"));
         if (exclusive && paths.Length != 1)
-            throw new InvalidOperationException("Параметры ТВ можно применить только после переключения на выбранный телевизор.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_242"));
         var selected = matches[0];
         if (paths.Count(path => path.SourceInfo.AdapterId.Equals(selected.SourceInfo.AdapterId) &&
             path.SourceInfo.Id == selected.SourceInfo.Id) != 1)
-            throw new InvalidOperationException("Для отдельного масштаба ТВ отключите дублирование изображения в Windows.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_243"));
         return selected;
     }
 
@@ -152,7 +150,7 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
         };
         int result = DisplayVideoNative.GetSourceName(ref request);
         if (result != 0 || string.IsNullOrWhiteSpace(request.Name))
-            throw new InvalidOperationException("Не удалось сопоставить выбранный ТВ с устройством Windows.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_244"));
         return request.Name;
     }
 
@@ -174,6 +172,6 @@ internal sealed class WindowsTelevisionDisplayApi : ITelevisionDisplayApi
                 if (string.Equals(display.Id, televisionId, StringComparison.OrdinalIgnoreCase)) return adapter.Name;
             }
         }
-        throw new InvalidOperationException("ТВ недоступен для перечисления режимов. Включите его и нажмите «Обновить режимы ТВ».");
+        throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WindowsTelevisionDisplayApi_245"));
     }
 }

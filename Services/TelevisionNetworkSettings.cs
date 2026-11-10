@@ -21,7 +21,7 @@ internal static class TelevisionNetworkSettings
     {
         TelevisionNetworkProvider.LG => (settings.TelevisionIpAddress, settings.TelevisionMacAddress),
         TelevisionNetworkProvider.Hisense => (settings.HisenseIpAddress, settings.HisenseMacAddress),
-        _ => throw new InvalidOperationException("Выберите LG или Hisense в настройках сетевого управления ТВ.")
+        _ => throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionNetworkSettings_185"))
     };
 
     internal static TelevisionOverlayState LocalState(AppSettings settings, bool televisionActive, bool monitorsActive)
@@ -39,6 +39,6 @@ internal static class TelevisionNetworkSettings
     internal static void RequireLg(AppSettings settings)
     {
         if (settings.TelevisionNetworkProvider != TelevisionNetworkProvider.LG)
-            throw new InvalidOperationException("Сопряжение и управление питанием webOS доступны только для LG. Для Hisense используется отдельное сопряжение RemoteNOW.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionNetworkSettings_186"));
     }
 }

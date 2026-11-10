@@ -28,13 +28,13 @@ internal sealed partial class FlydigiWindowService
         {
             Trace("open.state", new { alreadyTracked = _window != 0, windowAlive = IsOpen });
             LogProcessAccess((uint)Environment.ProcessId, "controllerhelper");
-            if (_window != 0) throw new InvalidOperationException("Клиент Flydigi уже открыт в оверлее.");
+            if (_window != 0) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("FlydigiWindowService_086"));
             stage = "find-window";
             FlydigiWindowCandidate? previousCandidate = FindWindow();
             stage = "find-executable";
             string? executable = FindExecutable();
             if (executable is null)
-                throw new FileNotFoundException("Flydigi Space Station не найден. Установите клиент в стандартную папку Program Files.");
+                throw new FileNotFoundException(ControllerHelper.Localization.Text.Get("FlydigiWindowService_087"));
             FlydigiWindowCandidate candidate;
             Process? launched = null;
             try
@@ -61,7 +61,7 @@ internal sealed partial class FlydigiWindowService
             stage = "validate-window";
             GetWindowThreadProcessId(window, out uint processId);
             if (!IsWindow(window) || !IsWindowVisible(window) || processId != candidate.ProcessId)
-                throw new InvalidOperationException("Окно Flydigi изменилось во время поиска. Повторите открытие.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("FlydigiWindowService_088"));
             Trace("selection.result", new { candidate.Visible, titleMatches = candidate.TitleMatches, candidate.WindowClass,
                 activation = "application", sameWindow = previousCandidate?.Window == window });
             Trace("window.selected", WindowState(window));
@@ -69,7 +69,7 @@ internal sealed partial class FlydigiWindowService
             stage = "capture-placement";
             WindowPlacement placement = new() { Length = (uint)Marshal.SizeOf<WindowPlacement>() };
             if (!GetWindowPlacement(window, ref placement))
-                throw NativeFailure("GetWindowPlacement", Marshal.GetLastPInvokeError(), "Не удалось прочитать положение окна Flydigi.");
+                throw NativeFailure("GetWindowPlacement", Marshal.GetLastPInvokeError(), ControllerHelper.Localization.Text.Get("FlydigiWindowService_089"));
             _window = window;
             _originalPlacement = placement;
             captured = true;
@@ -87,18 +87,17 @@ internal sealed partial class FlydigiWindowService
             if (_window != window || !IsWindow(window))
             {
                 Trace("window.lost", new { stage, trackedWindowChanged = _window != window, windowAlive = IsWindow(window) });
-                throw new InvalidOperationException("Окно Flydigi исчезло во время открытия. Подробности в logs.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("OverlayWindow_xaml_025"));
             }
             if (!IsWindowVisible(window))
             {
                 Trace("window.show-failed", WindowState(window));
-                throw new InvalidOperationException("Windows не показала окно Flydigi. Подробности в logs.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("FlydigiWindowService_090"));
             }
             stage = "fit-after-dpi";
             RectInt32 bounds = getBounds();
             if (!FitToBounds(bounds))
-                throw new InvalidOperationException("Минимальный размер окна Flydigi превышает доступную область. " +
-                    "Уменьшите масштаб интерфейса Flydigi или масштаб Windows на этом экране.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("FlydigiWindowService_091"));
             stage = "focus";
             if (!TryFocus(window))
             {
@@ -131,14 +130,14 @@ internal sealed partial class FlydigiWindowService
     {
         if (!IsOpen) { Trace("fit.window-missing"); return false; }
         if (!IsWindowVisible(_window))
-            throw new InvalidOperationException("Flydigi скрыл своё окно. Повторите открытие из оверлея.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("FlydigiWindowService_092"));
         if (bounds.Width < 400 || bounds.Height < 300)
         {
             Trace("fit.viewport-too-small", new { bounds.X, bounds.Y, bounds.Width, bounds.Height });
-            throw new InvalidOperationException("Область Flydigi слишком мала.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("FlydigiWindowService_093"));
         }
         if (!GetWindowRect(_window, out Rect actual))
-            throw NativeFailure("GetWindowRect", Marshal.GetLastPInvokeError(), "Не удалось прочитать размер окна Flydigi.");
+            throw NativeFailure("GetWindowRect", Marshal.GetLastPInvokeError(), ControllerHelper.Localization.Text.Get("FlydigiWindowService_094"));
         ScreenBounds viewport = new(bounds.X, bounds.Y, bounds.Width, bounds.Height);
         ScreenBounds target = OverlayGeometry.Fit(viewport, actual.Right - actual.Left, actual.Bottom - actual.Top);
         var before = Bounds(actual);
@@ -148,7 +147,7 @@ internal sealed partial class FlydigiWindowService
         {
             // Keep focus where it is; only positioning and size are adjusted.
             if (!SetWindowPos(_window, (nint)(-1), target.X, target.Y, target.Width, target.Height, 0x10))
-                throw NativeFailure("SetWindowPos", Marshal.GetLastPInvokeError(), "Не удалось поместить окно Flydigi в оверлей.");
+                throw NativeFailure("SetWindowPos", Marshal.GetLastPInvokeError(), ControllerHelper.Localization.Text.Get("FlydigiWindowService_095"));
         }
         bool measured = GetWindowRect(_window, out actual);
         int code = measured ? 0 : Marshal.GetLastPInvokeError();

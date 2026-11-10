@@ -16,8 +16,8 @@ internal sealed class ProfileOperationCoordinator
 
     internal Task<T> RunAsync<T>(Func<CancellationToken, Task<T>> operation)
     {
-        if (IsStopping) throw new InvalidOperationException("Приложение завершает работу.");
-        if (IsRunning) throw new InvalidOperationException("Переключение уже выполняется.");
+        if (IsStopping) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("ProfileOperationCoordinator_165"));
+        if (IsRunning) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("ProfileOperationCoordinator_166"));
         TaskCompletionSource<T> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         CancellationTokenSource cancellation = new();
         CancellationToken token = cancellation.Token;
@@ -47,7 +47,7 @@ internal sealed class ProfileOperationCoordinator
 
     internal Task RecoverAsync(Func<CancellationToken, Task> operation)
     {
-        if (IsStopping) throw new InvalidOperationException("Приложение завершает работу.");
+        if (IsStopping) throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("ProfileOperationCoordinator_165"));
         if (_recovery is not null) return _recovery;
         Task? prior = _active;
         CancellationTokenSource? priorCancellation = _cancellation;
@@ -80,7 +80,7 @@ internal sealed class ProfileOperationCoordinator
                 // failed rollback. Preserve that failure so StopAsync refuses exit.
                 if (token.IsCancellationRequested && priorFailure is not null)
                     throw new InvalidOperationException(
-                        "Аварийный возврат отменён, а предыдущее переключение завершилось с ошибкой. Повторите восстановление мониторов.",
+                        ControllerHelper.Localization.Text.Get("ProfileOperationCoordinator_167"),
                         priorFailure);
                 token.ThrowIfCancellationRequested();
                 await operation(token);

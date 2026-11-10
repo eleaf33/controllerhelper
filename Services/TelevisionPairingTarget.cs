@@ -22,9 +22,9 @@ internal sealed record TelevisionPairingTarget(string DisplayId, string Address,
     {
         TelevisionNetworkSettings.RequireLg(current);
         if (From(current) != this)
-            throw new InvalidOperationException("Параметры телевизора изменились. Повторите сопряжение для выбранного ТВ.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionPairingTarget_187"));
         if (string.IsNullOrWhiteSpace(key))
-            throw new InvalidOperationException("Телевизор не выдал ключ сопряжения.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionPairingTarget_188"));
         AppSettings updated = current.Copy();
         updated.TelevisionClientKey = key;
         updated.TelevisionClientKeyProtected = null;

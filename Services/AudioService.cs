@@ -18,7 +18,7 @@ public sealed class AudioService
         catch (Exception error) when (error is COMException or InvalidCastException)
         {
             throw new InvalidOperationException(
-                "Эта версия Windows не предоставляет используемый интерфейс переключения звука. Экран не переключён.", error);
+                ControllerHelper.Localization.Text.Get("AudioService_041"), error);
         }
     }
 
@@ -56,13 +56,13 @@ public sealed class AudioService
     public void SetDefault(string? id, CancellationToken cancellation = default)
     {
         if (string.IsNullOrWhiteSpace(id))
-            throw new InvalidOperationException("Выберите устройство вывода звука.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("AudioService_042"));
         Stopwatch wait = Stopwatch.StartNew();
         while (!IsActive(id))
         {
             cancellation.ThrowIfCancellationRequested();
             if (wait.Elapsed >= TimeSpan.FromSeconds(10))
-                throw new InvalidOperationException("Выбранное устройство звука не появилось после переключения экрана. Проверьте подключение телевизора и аудиовыход в настройках.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("AudioService_043"));
             cancellation.WaitHandle.WaitOne(250);
         }
 
@@ -115,7 +115,7 @@ public sealed class AudioService
         while (!IsActive(id))
         {
             if (wait.Elapsed >= TimeSpan.FromSeconds(10))
-                throw new InvalidOperationException($"Аудиовыход {id} не появился после восстановления экранов.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Format("AudioService_044", id));
             Thread.Sleep(250);
         }
     }

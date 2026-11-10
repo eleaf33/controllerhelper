@@ -91,7 +91,7 @@ public sealed class ControllerMonitor
         bool emergencyEnabled = false, string emergencyModifier = "LeftShoulder", string emergencyTrigger = "RightShoulder")
     {
         if (modifier == trigger || string.IsNullOrWhiteSpace(modifier) || string.IsNullOrWhiteSpace(trigger))
-            throw new ArgumentException("Выберите две разные кнопки геймпада.");
+            throw new ArgumentException(ControllerHelper.Localization.Text.Get("ControllerMonitor_052"));
         EmergencyHotkey.Validate(emergencyEnabled, emergencyModifier, emergencyTrigger, modifier, trigger);
         _emergencyEnabled = emergencyEnabled;
         _emergencyModifier = emergencyModifier;
@@ -265,16 +265,16 @@ public sealed class ControllerMonitor
                     $"overlay={OverlayOpen}, latched={_latched}, error={Error}");
 #endif
 
-            /* Диагностика кнопок: раскомментировать вместе с _pollNumber, StateChanged
-               и подписками в App.xaml.cs только при поиске проблем с конкретным геймпадом.
+            /* Button diagnostics: enable together with _pollNumber, StateChanged
+               and the App.xaml.cs subscriptions only when debugging a specific controller.
             if (++_pollNumber % 8 == 0)
             {
-                string active = selected is null ? "не выбран" : selected.ToString();
-                string pressed = selected is null ? "нет" :
+                string active = selected is null ? "not selected" : selected.ToString();
+                string pressed = selected is null ? "none" :
                     string.Join(", ", ButtonNames.Where(name => IsPressed(selected, name))
                         .Concat(selected.ControllerButtons.Select((value, index) => value ? $"Button:{index}" : null)
                             .OfType<string>()));
-                StateChanged?.Invoke($"GameInput: {devices.Length}; выбран: {active}; нажаты: {pressed}; " +
+                StateChanged?.Invoke($"GameInput: {devices.Length}; selected: {active}; pressed: {pressed}; " +
                     (_gameInput?.Error is string error ? $"; {error}" : _error is string startupError ? $"; {startupError}" : ""));
             }
             */

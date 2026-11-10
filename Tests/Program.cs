@@ -1,6 +1,8 @@
 using ControllerHelper.Services;
 using ControllerHelper.Models;
 
+ControllerHelper.Localization.Text.SetLanguage("ru");
+
 if (args is ["--validate-profile-file", string profileFile])
     return DisplayProfileTests.ValidateFile(profileFile);
 if (args is ["--tv-preflight-probe", string televisionProfileFile])
@@ -51,6 +53,7 @@ ErrorLog.Journal = new ErrorJournal(Path.Combine(Path.GetTempPath(), "Controller
     .. FlydigiDiagnosticsTests.Cases,
     .. FlydigiWindowSelectionTests.Cases,
     .. FlydigiWindowActivationTests.Cases,
+    .. LocalizationTests.Cases,
     .. WebOsSecurityTests.Cases
 ];
 

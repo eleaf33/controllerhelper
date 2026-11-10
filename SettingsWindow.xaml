@@ -1,6 +1,7 @@
 <Window
     x:Class="ControllerHelper.SettingsWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="using:ControllerHelper.Localization"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid Background="#101218" RequestedTheme="Dark">
         <Grid.Resources>
@@ -53,135 +54,144 @@
                       HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
             <Grid Margin="18,10,18,12">
                 <StackPanel x:Name="PcPanel" Spacing="12">
-                    <TextBlock Text="Настройка ПК" Style="{StaticResource SectionTitle}" Margin="4,2,0,0" />
+                    <TextBlock Text="{loc:Localize Key=SettingsWindow_359}" Style="{StaticResource SectionTitle}" Margin="4,2,0,0" />
+                    <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
+                        <StackPanel Spacing="8">
+                            <ComboBox x:Name="LanguageBox" Header="{loc:Localize Key=Language_Title}" HorizontalAlignment="Stretch">
+                                <ComboBoxItem Content="English" />
+                                <ComboBoxItem Content="Русский" />
+                            </ComboBox>
+                            <TextBlock Text="{loc:Localize Key=Language_RestartHint}" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                        </StackPanel>
+                    </Border>
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Мониторы" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="Выберите экраны рабочего места. Телевизор в этот список не входит."
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_360}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_361}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
                             <ListView x:Name="MonitorList" SelectionMode="Multiple" MinHeight="110"
                                       ScrollViewer.VerticalScrollMode="Disabled"
                                       ScrollViewer.VerticalScrollBarVisibility="Disabled" />
-                            <Button Content="Сохранить раскладку ПК" Click="Capture_Click" HorizontalAlignment="Stretch" />
+                            <Button Content="{loc:Localize Key=SettingsWindow_362}" Click="Capture_Click" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </Border>
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Аудиовыход ПК" FontSize="15" FontWeight="SemiBold" />
-                            <ComboBox x:Name="PcAudioBox" PlaceholderText="Выберите выход" HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_363}" FontSize="15" FontWeight="SemiBold" />
+                            <ComboBox x:Name="PcAudioBox" PlaceholderText="{loc:Localize Key=SettingsWindow_364}" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </Border>
-                    <Button x:Name="PcButton" Content="Вернуться к ПК" Click="Pc_Click" HorizontalAlignment="Stretch" Style="{StaticResource AccentActionButton}" />
+                    <Button x:Name="PcButton" Content="{loc:Localize Key=TrayIcon_023}" Click="Pc_Click" HorizontalAlignment="Stretch" Style="{StaticResource AccentActionButton}" />
                 </StackPanel>
 
                 <StackPanel x:Name="TvPanel" Spacing="12" Visibility="Collapsed">
-                    <TextBlock Text="Настройка ТВ" Style="{StaticResource SectionTitle}" Margin="4,2,0,0" />
+                    <TextBlock Text="{loc:Localize Key=SettingsWindow_365}" Style="{StaticResource SectionTitle}" Margin="4,2,0,0" />
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Телевизор" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="Будет активен только выбранный экран." Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap" />
-                            <ComboBox x:Name="TelevisionBox" PlaceholderText="Выберите экран" HorizontalAlignment="Stretch" />
-                            <Button Content="Сохранить раскладку ТВ" Click="CaptureTv_Click" HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_366}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_367}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap" />
+                            <ComboBox x:Name="TelevisionBox" PlaceholderText="{loc:Localize Key=SettingsWindow_368}" HorizontalAlignment="Stretch" />
+                            <Button Content="{loc:Localize Key=SettingsWindow_369}" Click="CaptureTv_Click" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </Border>
                     <ContentControl x:Name="TvVideoPanel" HorizontalContentAlignment="Stretch">
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Изображение на ТВ" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="Выбранные параметры применяются при каждом запуске «Играть на ТВ»."
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_370}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_371}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <ComboBox x:Name="TvResolutionBox" Header="Разрешение" HorizontalAlignment="Stretch"
+                            <ComboBox x:Name="TvResolutionBox" Header="{loc:Localize Key=SettingsWindow_372}" HorizontalAlignment="Stretch"
                                       SelectionChanged="TvResolution_SelectionChanged" />
-                            <ComboBox x:Name="TvRefreshBox" Header="Частота обновления" HorizontalAlignment="Stretch"
+                            <ComboBox x:Name="TvRefreshBox" Header="{loc:Localize Key=SettingsWindow_373}" HorizontalAlignment="Stretch"
                                       SelectionChanged="TvRefresh_SelectionChanged" />
-                            <ComboBox x:Name="TvScaleBox" Header="Масштаб только ТВ" HorizontalAlignment="Stretch"
+                            <ComboBox x:Name="TvScaleBox" Header="{loc:Localize Key=SettingsWindow_374}" HorizontalAlignment="Stretch"
                                       SelectionChanged="TvScale_SelectionChanged" />
                             <TextBlock x:Name="TvVideoStatusText" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
                             <TextBlock x:Name="TvScaleStatusText" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <Button Content="Обновить режимы ТВ" Click="RefreshTvVideo_Click" HorizontalAlignment="Stretch" />
+                            <Button Content="{loc:Localize Key=SettingsWindow_375}" Click="RefreshTvVideo_Click" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </Border>
                     </ContentControl>
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="10">
-                            <TextBlock Text="Аудиовыход ТВ" FontSize="15" FontWeight="SemiBold" />
-                            <ComboBox x:Name="TvAudioBox" PlaceholderText="Выберите выход" HorizontalAlignment="Stretch" />
-                            <TextBlock Text="Список обновляется при открытии. Выход ТВ можно выбрать заранее со статусом «не подключено»: он может стать доступным после включения экрана. Старые отсутствующие устройства скрыты, кроме текущего выбора." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" />
-                            <TextBlock Text="После включения экрана ожидаем звук ТВ до 10 секунд. Если он недоступен, используем выбранный аудиовыход ПК. Ошибка звука не возвращает изображение на мониторы." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_376}" FontSize="15" FontWeight="SemiBold" />
+                            <ComboBox x:Name="TvAudioBox" PlaceholderText="{loc:Localize Key=SettingsWindow_364}" HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_377}" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_378}" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" />
                         </StackPanel>
                     </Border>
-                    <ComboBox x:Name="TvNetworkProviderBox" Header="Сетевое управление выбранным ТВ" HorizontalAlignment="Stretch">
+                    <ComboBox x:Name="TvNetworkProviderBox" Header="{loc:Localize Key=SettingsWindow_379}" HorizontalAlignment="Stretch">
                         <ComboBoxItem Content="LG" />
                         <ComboBoxItem Content="Hisense" />
                     </ComboBox>
                     <Expander x:Name="LgNetworkExpander" Header="LG" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <StackPanel Spacing="10" HorizontalAlignment="Stretch">
-                            <ToggleSwitch x:Name="WakeTelevisionToggle" Header="Пробуждение LG по сети" />
-                            <TextBlock Text="Стандартный Wake-on-LAN. Опция LG TV On With Mobile не гарантирует его поддержку."
+                            <ToggleSwitch x:Name="WakeTelevisionToggle" Header="{loc:Localize Key=SettingsWindow_380}" OnContent="{loc:Localize Key=SettingsWindow_417}" OffContent="{loc:Localize Key=SettingsWindow_418}" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_381}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <TextBlock Text="Локальный IPv4-адрес ТВ" FontSize="13" />
-                            <TextBox x:Name="TelevisionIpBox" PlaceholderText="Например, 192.168.1.50" />
-                            <TextBlock Text="MAC-адрес ТВ" FontSize="13" />
-                            <TextBox x:Name="TelevisionMacBox" PlaceholderText="Например, AA:BB:CC:DD:EE:FF" />
-                            <Button x:Name="CheckTvConnectionButton" Content="Проверить соединение"
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_382}" FontSize="13" />
+                            <TextBox x:Name="TelevisionIpBox" PlaceholderText="{loc:Localize Key=SettingsWindow_383}" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_384}" FontSize="13" />
+                            <TextBox x:Name="TelevisionMacBox" PlaceholderText="{loc:Localize Key=SettingsWindow_385}" />
+                            <Button x:Name="CheckTvConnectionButton" Content="{loc:Localize Key=SettingsWindow_386}"
                                     Click="CheckTvConnection_Click" HorizontalAlignment="Stretch" />
-                            <TextBlock Text="Защищённое управление ТВ" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_387}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
                             <TextBlock x:Name="CertificateStatusText" TextWrapping="Wrap" FontSize="12"
                                        Foreground="{StaticResource MutedBrush}" />
-                            <Button x:Name="CheckCertificateButton" Content="Проверить сертификат ТВ"
+                            <Button x:Name="CheckCertificateButton" Content="{loc:Localize Key=SettingsWindow_388}"
                                     Click="CheckCertificate_Click" HorizontalAlignment="Stretch" />
                             <CheckBox x:Name="AllowInsecureWebOsBox">
-                                <TextBlock Text="Разрешить старый режим без шифрования (ключ передаётся открыто)"
+                                <TextBlock Text="{loc:Localize Key=SettingsWindow_389}"
                                            TextWrapping="Wrap" FontSize="12" />
                             </CheckBox>
-                            <Button x:Name="PairTvButton" Content="Сопрячь телевизор"
+                            <Button x:Name="PairTvButton" Content="{loc:Localize Key=SettingsWindow_390}"
                                     Click="PairTv_Click" HorizontalAlignment="Stretch" />
-                            <Button x:Name="RefreshLgInputsButton" Content="Обновить входы телевизора"
+                            <Button x:Name="RefreshLgInputsButton" Content="{loc:Localize Key=SettingsWindow_391}"
                                     Click="RefreshLgInputs_Click" HorizontalAlignment="Stretch" />
-                            <ComboBox x:Name="LgInputBox" Header="Вход при переходе на ТВ" HorizontalAlignment="Stretch" />
-                            <Button x:Name="CancelLgInputsButton" Content="Отменить обновление входов"
+                            <ComboBox x:Name="LgInputBox" Header="{loc:Localize Key=SettingsWindow_392}" HorizontalAlignment="Stretch" />
+                            <Button x:Name="CancelLgInputsButton" Content="{loc:Localize Key=SettingsWindow_393}"
                                     Click="CancelLgInputs_Click" IsEnabled="False" HorizontalAlignment="Stretch" />
-                            <TextBlock Text="Включите LG, обновите список, выберите HDMI компьютера и сохраните настройки. Команда «Играть на ТВ» переключит LG с Apple TV или другого источника на выбранный вход. Вход без сигнала тоже можно выбрать. Если LG отклоняет запрос, повторите сопряжение и подтвердите разрешение на телевизоре."
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_394}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
                         </StackPanel>
                     </Expander>
                     <Expander x:Name="HisenseNetworkExpander" Header="Hisense" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <StackPanel Spacing="10" HorizontalAlignment="Stretch">
-                            <ToggleSwitch x:Name="WakeHisenseToggle" Header="Пробуждение Hisense по сети" />
-                            <TextBlock Text="Включите Wake on LAN в настройках сети телевизора. Для Wi-Fi нужна поддержка Wake on Wireless Network. ПК и ТВ должны быть в одной локальной сети; телевизор должен оставаться в режиме ожидания. Поддержка зависит от модели и прошивки."
+                            <ToggleSwitch x:Name="WakeHisenseToggle" Header="{loc:Localize Key=SettingsWindow_395}" OnContent="{loc:Localize Key=SettingsWindow_417}" OffContent="{loc:Localize Key=SettingsWindow_418}" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_396}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <TextBox x:Name="HisenseIpBox" Header="Локальный IPv4-адрес Hisense" PlaceholderText="Например, 192.168.1.60" />
-                            <TextBox x:Name="HisenseMacBox" Header="MAC-адрес Hisense" PlaceholderText="Например, AA:BB:CC:DD:EE:FF" />
-                            <TextBlock Text="Укажите MAC используемого подключения: у Ethernet и Wi-Fi разные адреса."
+                            <TextBox x:Name="HisenseIpBox" Header="{loc:Localize Key=SettingsWindow_397}" PlaceholderText="{loc:Localize Key=SettingsWindow_398}" />
+                            <TextBox x:Name="HisenseMacBox" Header="{loc:Localize Key=SettingsWindow_399}" PlaceholderText="{loc:Localize Key=SettingsWindow_385}" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_400}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <Button x:Name="CheckHisenseConnectionButton" Content="Проверить соединение" Click="CheckHisenseConnection_Click" HorizontalAlignment="Stretch" />
-                            <Button x:Name="TestHisenseWakeButton" Content="Проверить пробуждение без переключения экранов" Click="TestHisenseWake_Click" HorizontalAlignment="Stretch" />
-                            <TextBlock Text="Прямое сопряжение RemoteNOW (тестовая версия для U7QF)" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0" />
-                            <TextBlock Text="Включите телевизор пультом. При первом сопряжении подтвердите его сертификат и введите PIN с экрана ТВ. Телефон не нужен. Совместимость с вашей прошивкой проверяется этой сборкой."
+                            <Button x:Name="CheckHisenseConnectionButton" Content="{loc:Localize Key=SettingsWindow_386}" Click="CheckHisenseConnection_Click" HorizontalAlignment="Stretch" />
+                            <Button x:Name="TestHisenseWakeButton" Content="{loc:Localize Key=SettingsWindow_401}" Click="TestHisenseWake_Click" HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_402}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_403}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <Button x:Name="PairHisenseButton" Content="Сопрячь Hisense" Click="PairHisense_Click" HorizontalAlignment="Stretch" />
-                            <Button x:Name="RefreshHisenseInputsButton" Content="Обновить входы телевизора" Click="RefreshHisenseInputs_Click" HorizontalAlignment="Stretch" />
-                            <ComboBox x:Name="HisenseInputBox" Header="Вход при переходе на ТВ" HorizontalAlignment="Stretch" />
+                            <Button x:Name="PairHisenseButton" Content="{loc:Localize Key=SettingsWindow_404}" Click="PairHisense_Click" HorizontalAlignment="Stretch" />
+                            <Button x:Name="RefreshHisenseInputsButton" Content="{loc:Localize Key=SettingsWindow_391}" Click="RefreshHisenseInputs_Click" HorizontalAlignment="Stretch" />
+                            <ComboBox x:Name="HisenseInputBox" Header="{loc:Localize Key=SettingsWindow_392}" HorizontalAlignment="Stretch" />
                             <TextBlock x:Name="HisensePairStatusText" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <Button x:Name="CancelHisenseButton" Content="Отменить проверку / сопряжение" Click="CancelHisense_Click" IsEnabled="False" HorizontalAlignment="Stretch" />
-                            <TextBlock Text="При включённом пробуждении команда «Играть на ТВ» отправит Wake-on-LAN. Если выбран вход, приложение попробует переключить его перед переносом изображения. После сопряжения возврат к мониторам также выключает Hisense по сети: сначала восстанавливаются мониторы, затем проверяется состояние ТВ и отправляется команда питания. Уже спящий ТВ не включается."
+                            <Button x:Name="CancelHisenseButton" Content="{loc:Localize Key=SettingsWindow_405}" Click="CancelHisense_Click" IsEnabled="False" HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_406}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
-                            <TextBlock Text="HDMI при включении" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
-                            <TextBlock Text="На VIDAA проверьте: Настройки → Система → Дополнительные настройки → Стартовая страница → Последний источник. Выберите HDMI компьютера перед выключением ТВ. Названия и доступность пунктов зависят от модели. Wake-on-LAN сам не выбирает HDMI."
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_407}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_408}"
                                        Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
                         </StackPanel>
                     </Expander>
-                    <Button x:Name="TvButton" Content="Играть на ТВ" Click="Tv_Click" HorizontalAlignment="Stretch" Style="{StaticResource AccentActionButton}" />
+                    <Button x:Name="TvButton" Content="{loc:Localize Key=TrayIcon_022}" Click="Tv_Click" HorizontalAlignment="Stretch" Style="{StaticResource AccentActionButton}" />
                 </StackPanel>
 
                 <StackPanel x:Name="ControllerPanel" Spacing="12" Visibility="Collapsed">
-                    <TextBlock Text="Настройка контроллера" Style="{StaticResource SectionTitle}" Margin="4,2,0,0" />
+                    <TextBlock Text="{loc:Localize Key=SettingsWindow_409}" Style="{StaticResource SectionTitle}" Margin="4,2,0,0" />
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="12">
-                            <TextBlock Text="Комбинация оверлея" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="Геймпад" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_410}" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_411}" Foreground="{StaticResource MutedBrush}" FontSize="12" />
                             <ComboBox x:Name="ControllerBox" HorizontalAlignment="Stretch" SelectionChanged="ControllerBox_SelectionChanged" />
-                            <TextBlock Text="Выберите две разные кнопки одного геймпада." Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_412}" Foreground="{StaticResource MutedBrush}" FontSize="12" />
                             <Grid ColumnSpacing="8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -193,16 +203,16 @@
                                 <ComboBox x:Name="TriggerBox" Grid.Column="2" HorizontalAlignment="Stretch" />
                             </Grid>
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Content="Запомнить первую" Click="LearnModifier_Click" />
-                                <Button Content="Запомнить вторую" Click="LearnTrigger_Click" />
+                                <Button Content="{loc:Localize Key=SettingsWindow_413}" Click="LearnModifier_Click" />
+                                <Button Content="{loc:Localize Key=SettingsWindow_414}" Click="LearnTrigger_Click" />
                             </StackPanel>
                             <TextBlock x:Name="HotkeyDescription" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" FontSize="12" />
                         </StackPanel>
                     </Border>
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="8">
-                            <TextBlock Text="Аварийный возврат на мониторы" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <ToggleSwitch x:Name="EmergencyReturnToggle" Header="Хоткей возврата" OnContent="Включён" OffContent="Выключен" Toggled="EmergencyReturn_Toggled" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_415}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <ToggleSwitch x:Name="EmergencyReturnToggle" Header="{loc:Localize Key=SettingsWindow_416}" OnContent="{loc:Localize Key=SettingsWindow_417}" OffContent="{loc:Localize Key=SettingsWindow_418}" Toggled="EmergencyReturn_Toggled" />
                             <ContentControl x:Name="EmergencyReturnOptions" IsEnabled="False" HorizontalContentAlignment="Stretch">
                               <StackPanel Spacing="10">
                                 <Grid ColumnSpacing="8">
@@ -211,22 +221,22 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <ComboBox x:Name="EmergencyModifierBox" HorizontalAlignment="Stretch" AutomationProperties.Name="Первая кнопка аварийного возврата" />
+                                    <ComboBox x:Name="EmergencyModifierBox" HorizontalAlignment="Stretch" AutomationProperties.Name="{loc:Localize Key=SettingsWindow_419}" />
                                     <TextBlock Grid.Column="1" Text="+" VerticalAlignment="Center" FontSize="20" Foreground="{StaticResource AccentBrush}" />
-                                    <ComboBox x:Name="EmergencyTriggerBox" Grid.Column="2" HorizontalAlignment="Stretch" AutomationProperties.Name="Вторая кнопка аварийного возврата" />
+                                    <ComboBox x:Name="EmergencyTriggerBox" Grid.Column="2" HorizontalAlignment="Stretch" AutomationProperties.Name="{loc:Localize Key=SettingsWindow_420}" />
                                 </Grid>
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Content="Запомнить первую" Click="LearnEmergencyModifier_Click" />
-                                    <Button Content="Запомнить вторую" Click="LearnEmergencyTrigger_Click" />
+                                    <Button Content="{loc:Localize Key=SettingsWindow_413}" Click="LearnEmergencyModifier_Click" />
+                                    <Button Content="{loc:Localize Key=SettingsWindow_414}" Click="LearnEmergencyTrigger_Click" />
                                 </StackPanel>
                               </StackPanel>
                             </ContentControl>
-                            <TextBlock Text="Удерживайте обе кнопки 2 секунды для восстановления сохранённой раскладки ПК. Работает в фоне, пока приложение отвечает и геймпад подключён. Применяется после сохранения настроек." TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_421}" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" FontSize="12" />
                         </StackPanel>
                     </Border>
                     <Border Background="{StaticResource CardBrush}" CornerRadius="20" Padding="16">
                         <StackPanel Spacing="8">
-                            <TextBlock Text="Подключение" FontSize="15" FontWeight="SemiBold" />
+                            <TextBlock Text="{loc:Localize Key=SettingsWindow_422}" FontSize="15" FontWeight="SemiBold" />
                             <TextBlock x:Name="ControllerStatus" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" FontSize="12" />
                         </StackPanel>
                     </Border>
@@ -238,8 +248,8 @@
             <StackPanel Spacing="10">
                 <TextBlock x:Name="StatusText" TextWrapping="Wrap" Foreground="{StaticResource MutedBrush}" FontSize="12" MaxHeight="48" />
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Content="Сохранить настройки" Click="Save_Click" HorizontalAlignment="Stretch" Style="{StaticResource AccentActionButton}" />
-                    <Button Content="Обновить" Click="Refresh_Click" HorizontalAlignment="Stretch" />
+                    <Button Content="{loc:Localize Key=SettingsWindow_423}" Click="Save_Click" HorizontalAlignment="Stretch" Style="{StaticResource AccentActionButton}" />
+                    <Button Content="{loc:Localize Key=SettingsWindow_424}" Click="Refresh_Click" HorizontalAlignment="Stretch" />
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -254,19 +264,19 @@
                 <Button x:Name="PcNav" Grid.Column="0" Click="PcNav_Click" Background="#343044" Style="{StaticResource NavButtonStyle}">
                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                         <PathIcon x:Name="PcNavIcon" Data="F0 M3,4 L21,4 L21,17 L3,17 Z M5,6 L5,15 L19,15 L19,6 Z M10,17 L14,17 L14,19 L17,19 L17,20 L7,20 L7,19 L10,19 Z" Width="23" Height="23" Foreground="{StaticResource AccentBrush}" />
-                        <TextBlock x:Name="PcNavText" Text="ПК" Foreground="{StaticResource AccentBrush}" FontSize="11" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="PcNavText" Text="{loc:Localize Key=SettingsWindow_425}" Foreground="{StaticResource AccentBrush}" FontSize="11" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Button>
                 <Button x:Name="TvNav" Grid.Column="1" Click="TvNav_Click" Style="{StaticResource NavButtonStyle}">
                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                         <PathIcon x:Name="TvNavIcon" Data="F0 M3,6 L21,6 L21,18 L3,18 Z M5,8 L5,16 L19,16 L19,8 Z M10,18 L14,18 L14,20 L17,20 L17,21 L7,21 L7,20 L10,20 Z M8,3 L9,2 L12,4 L15,2 L16,3 L12,6 Z" Width="23" Height="23" Foreground="{StaticResource MutedBrush}" />
-                        <TextBlock x:Name="TvNavText" Text="ТВ" Foreground="{StaticResource MutedBrush}" FontSize="11" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="TvNavText" Text="{loc:Localize Key=SettingsWindow_426}" Foreground="{StaticResource MutedBrush}" FontSize="11" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Button>
                 <Button x:Name="ControllerNav" Grid.Column="2" Click="ControllerNav_Click" Style="{StaticResource NavButtonStyle}">
                     <StackPanel Spacing="4" HorizontalAlignment="Center">
                         <PathIcon x:Name="ControllerNavIcon" Data="M7,8 L17,8 C20,8 22,11 22,16 L22,18 C22,20 20,21 18,19 L15,16 L9,16 L6,19 C4,21 2,20 2,18 L2,16 C2,11 4,8 7,8 Z M7,11 L7,15 M5,13 L9,13 M16,11 L16,12 M19,13 L19,14" Width="23" Height="23" Foreground="{StaticResource MutedBrush}" />
-                        <TextBlock x:Name="ControllerNavText" Text="Контроллер" Foreground="{StaticResource MutedBrush}" FontSize="11" HorizontalAlignment="Center" />
+                        <TextBlock x:Name="ControllerNavText" Text="{loc:Localize Key=SettingsWindow_427}" Foreground="{StaticResource MutedBrush}" FontSize="11" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </Grid>

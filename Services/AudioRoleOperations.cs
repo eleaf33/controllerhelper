@@ -16,7 +16,7 @@ internal static class AudioRoleOperations
 
     internal static void Restore(AudioDefaults snapshot, Action<string> wait, Action<string, int> set)
     {
-        if (snapshot.EndpointIds.Length != RoleCount) throw new ArgumentException("Неверный снимок аудиоролей.", nameof(snapshot));
+        if (snapshot.EndpointIds.Length != RoleCount) throw new ArgumentException(ControllerHelper.Localization.Text.Get("AudioRoleOperations_038"), nameof(snapshot));
         Dictionary<string, Exception?> readiness = new(StringComparer.Ordinal);
         List<Exception> failures = [];
         for (int role = 0; role < RoleCount; role++)
@@ -38,9 +38,9 @@ internal static class AudioRoleOperations
             }
             if (failure is not null)
             {
-                failures.Add(new InvalidOperationException($"Не удалось восстановить аудиороль {role}.", failure));
+                failures.Add(new InvalidOperationException(ControllerHelper.Localization.Text.Format("AudioRoleOperations_039", role), failure));
             }
         }
-        if (failures.Count > 0) throw new AggregateException("Не все аудиороли восстановлены.", failures);
+        if (failures.Count > 0) throw new AggregateException(ControllerHelper.Localization.Text.Get("AudioRoleOperations_040"), failures);
     }
 }

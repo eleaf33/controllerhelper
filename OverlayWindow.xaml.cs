@@ -43,6 +43,7 @@ public sealed partial class OverlayWindow : Window
         Windows.Graphics.RectInt32? televisionBounds)
     {
         InitializeComponent();
+        ((FrameworkElement)Content).Language = ControllerHelper.Localization.Text.LanguageTag;
         OverlayInputGuard.Attach(OverlayRoot);
         Title = "ControllerHelper";
         ExtendsContentIntoTitleBar = true;
@@ -260,7 +261,7 @@ public sealed partial class OverlayWindow : Window
                 return;
             }
             if (!_flydigiWindow.IsOpen)
-                throw new InvalidOperationException("Окно Flydigi исчезло во время открытия. Подробности в logs.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("OverlayWindow_xaml_025"));
             _flydigiInput.StartPointer();
             _inputScope.SetMode(ControllerInputMode.Flydigi);
             _flydigiWatch.Start();
@@ -319,8 +320,7 @@ public sealed partial class OverlayWindow : Window
         try
         {
             if (!_flydigiWindow.FitToBounds(GetFlydigiBounds()))
-                throw new InvalidOperationException("Окно Flydigi не помещается в доступную область этого экрана. " +
-                    "Уменьшите масштаб интерфейса Flydigi или масштаб Windows.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("OverlayWindow_xaml_026"));
         }
         catch (Exception error)
         {
@@ -339,7 +339,7 @@ public sealed partial class OverlayWindow : Window
         nint window = WindowNative.GetWindowHandle(this);
         CursorPoint origin = default;
         if (!GetClientRect(window, out ClientRect client) || !ClientToScreen(window, ref origin))
-            throw new InvalidOperationException("Не удалось определить размер оверлея.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("OverlayWindow_xaml_027"));
         return new(origin.X, origin.Y, client.Right - client.Left, client.Bottom - client.Top);
     }
 
@@ -353,7 +353,7 @@ public sealed partial class OverlayWindow : Window
 
     private Windows.Graphics.RectInt32 GetFlydigiBounds()
     {
-        if (_closed) throw new OperationCanceledException("Оверлей закрыт.");
+        if (_closed) throw new OperationCanceledException(ControllerHelper.Localization.Text.Get("OverlayWindow_xaml_028"));
         ScreenBounds client = GetClientScreenBounds();
         double scale = OverlayRoot.XamlRoot.RasterizationScale;
         // Constrain the star row to the real client area, even during a DPI/display transition.
@@ -439,7 +439,7 @@ public sealed partial class OverlayWindow : Window
         try
         {
             int closed = await TelegramProcessService.CloseAsync();
-            MonitorErrorText.Text = closed == 0 ? "Telegram не запущен." : "Telegram закрыт.";
+            MonitorErrorText.Text = closed == 0 ? ControllerHelper.Localization.Text.Get("OverlayWindow_xaml_029") : ControllerHelper.Localization.Text.Get("OverlayWindow_xaml_030");
             MonitorErrorText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 169, 221, 255));
             MonitorErrorText.Visibility = Visibility.Visible;
             TelegramGlow.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(81, 67, 118, 156));
@@ -449,7 +449,7 @@ public sealed partial class OverlayWindow : Window
         {
             StartupTrace.Write($"Could not close Telegram: {error}");
             ErrorLog.Write("telegram.close", error);
-            MonitorErrorText.Text = $"Не удалось закрыть Telegram: {error.Message}";
+            MonitorErrorText.Text = ControllerHelper.Localization.Text.Format("OverlayWindow_xaml_031", error.Message);
             MonitorErrorText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 155, 171));
             MonitorErrorText.Visibility = Visibility.Visible;
             TelegramGlow.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(120, 180, 48, 68));

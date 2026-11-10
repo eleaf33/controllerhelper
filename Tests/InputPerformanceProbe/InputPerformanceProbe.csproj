@@ -19,5 +19,7 @@
     <Compile Include="../../Services/ControllerDevice.cs" Link="ControllerDevice.cs" />
     <Compile Include="../../Services/ControllerSelection.cs" Link="ControllerSelection.cs" />
     <Compile Include="../../Services/ControllerPollingCadence.cs" Link="ControllerPollingCadence.cs" />
+    <Compile Include="../../Localization/Text.cs" Link="Localization/Text.cs" />
+    <EmbeddedResource Include="../../Localization/*.json" LogicalName="ControllerHelper.Localization.%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

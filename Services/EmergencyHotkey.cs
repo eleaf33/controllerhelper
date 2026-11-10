@@ -29,9 +29,9 @@ internal sealed class EmergencyHotkey
     {
         if (!enabled) return;
         if (string.IsNullOrWhiteSpace(modifier) || string.IsNullOrWhiteSpace(trigger) || modifier == trigger)
-            throw new ArgumentException("Для аварийного возврата выберите две разные кнопки.");
+            throw new ArgumentException(ControllerHelper.Localization.Text.Get("EmergencyHotkey_083"));
         if ((modifier == overlayModifier && trigger == overlayTrigger) ||
             (modifier == overlayTrigger && trigger == overlayModifier))
-            throw new ArgumentException("Хоткей аварийного возврата должен отличаться от хоткея оверлея.");
+            throw new ArgumentException(ControllerHelper.Localization.Text.Get("EmergencyHotkey_084"));
     }
 }

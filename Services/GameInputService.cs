@@ -37,7 +37,7 @@ internal sealed class GameInputService : IDisposable
     {
         int result = GameInputNative.GameInputCreate(out _gameInput);
         if (result < 0 || _gameInput == 0)
-            throw new COMException("Не удалось инициализировать GameInput.", result);
+            throw new COMException(ControllerHelper.Localization.Text.Get("GameInputService_097"), result);
 
         _getCurrentReading = GameInputNative.Method<GameInputNative.GetCurrentReading>(_gameInput, 4);
         _registerDeviceCallback = GameInputNative.Method<GameInputNative.RegisterDeviceCallback>(_gameInput, 9);
@@ -54,7 +54,7 @@ internal sealed class GameInputService : IDisposable
         {
             GameInputNative.Release(_gameInput);
             _gameInput = 0;
-            throw new COMException("Не удалось получить список GameInput-геймпадов.", result);
+            throw new COMException(ControllerHelper.Localization.Text.Get("GameInputService_098"), result);
         }
 
     }
@@ -183,7 +183,7 @@ internal sealed class GameInputService : IDisposable
                     return;
                 }
                 if (_devices.ContainsKey(id)) return;
-                string name = "GameInput-контроллер";
+                string name = ControllerHelper.Localization.Text.Get("GameInputService_099");
                 if (info.DisplayName != 0)
                 {
                     var gameInputString = Marshal.PtrToStructure<GameInputNative.GameInputString>(info.DisplayName);
@@ -199,7 +199,7 @@ internal sealed class GameInputService : IDisposable
                 Error = null;
             }
         }
-        catch (Exception error) { Error = $"Ошибка перечисления GameInput: {error.Message}"; }
+        catch (Exception error) { Error = ControllerHelper.Localization.Text.Format("GameInputService_100", error.Message); }
     }
 
     public void Dispose()

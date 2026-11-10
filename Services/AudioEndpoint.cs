@@ -6,11 +6,11 @@ public sealed record AudioEndpoint(string Id, string Name, uint State)
     public override string ToString() => State switch
     {
         1 => Name,
-        2 => $"{Name} (отключено в Windows)",
-        4 => $"{Name} (устройство отсутствует)",
-        8 => $"{Name} (не подключено)",
-        0 => $"{Name} (сохранённый выход не найден)",
-        _ => $"{Name} (состояние неизвестно: 0x{State:X})"
+        2 => ControllerHelper.Localization.Text.Format("AudioEndpoint_032", Name),
+        4 => ControllerHelper.Localization.Text.Format("AudioEndpoint_033", Name),
+        8 => ControllerHelper.Localization.Text.Format("AudioEndpoint_034", Name),
+        0 => ControllerHelper.Localization.Text.Format("AudioEndpoint_035", Name),
+        _ => ControllerHelper.Localization.Text.Format("AudioEndpoint_036", Name, State)
     };
 }
 
@@ -26,7 +26,7 @@ internal static class AudioEndpointChoices
             .OrderByDescending(device => device.IsActive).ThenBy(device => device.Name).ToList();
         if (!string.IsNullOrWhiteSpace(selectedId) && !choices.Any(device =>
             string.Equals(device.Id, selectedId, StringComparison.OrdinalIgnoreCase)))
-            choices.Add(new AudioEndpoint(selectedId, "Ранее выбранное устройство", 0));
+            choices.Add(new AudioEndpoint(selectedId, ControllerHelper.Localization.Text.Get("AudioEndpoint_037"), 0));
         return choices.ToArray();
     }
 }

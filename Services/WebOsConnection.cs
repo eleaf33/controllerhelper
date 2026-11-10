@@ -13,9 +13,9 @@ internal static class WebOsConnection
     {
         if ((!settings.AllowInsecureWebOs && endpoint.Scheme != "wss") ||
             (settings.AllowInsecureWebOs && endpoint.Scheme != "ws"))
-            throw new TelevisionCertificateException("Протокол соединения не соответствует выбранному режиму.");
+            throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("WebOsConnection_194"));
         if (!settings.AllowInsecureWebOs && !WebOsSecurity.HasFingerprint(settings.TelevisionCertificateSha256))
-            throw new TelevisionCertificateException("Сертификат телевизора ещё не подтверждён.");
+            throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("WebOsConnection_195"));
         ClientWebSocket socket = new();
         using SocketsHttpHandler handler = new() { UseProxy = false, UseCookies = false, AllowAutoRedirect = false };
         using HttpMessageInvoker invoker = new(handler, disposeHandler: false);
@@ -40,9 +40,9 @@ internal static class WebOsConnection
             socket.Dispose();
             if (cancellation.IsCancellationRequested) cancellation.ThrowIfCancellationRequested();
             if (rejectedCertificate)
-                throw new TelevisionCertificateException("Сертификат телевизора изменился или его срок действия недопустим. Ключ не отправлен. Повторно проверьте сертификат во вкладке ТВ.");
+                throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("WebOsConnection_196"));
             if (!settings.AllowInsecureWebOs && error is WebSocketException)
-                throw new InvalidOperationException("Не удалось установить защищённое соединение с ТВ. Проверьте питание, адрес и поддержку TLS. Автоматический переход на открытый канал отключён.", error);
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsConnection_197"), error);
             throw;
         }
     }

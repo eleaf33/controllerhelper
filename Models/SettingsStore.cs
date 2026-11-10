@@ -41,21 +41,21 @@ internal sealed class SettingsFileStore(string directoryPath, string? legacyFile
             bool mainExists = File.Exists(_filePath);
             if (TryRead(BackupPath, out var backup, out plain, out warning))
             {
-                LoadWarning = (mainExists ? "Основной файл настроек повреждён или недоступен; "
-                    : "Основной файл настроек отсутствует; ") + "восстановлена резервная копия.";
+                LoadWarning = (mainExists ? ControllerHelper.Localization.Text.Get("SettingsStore_006")
+                    : ControllerHelper.Localization.Text.Get("SettingsStore_007")) + ControllerHelper.Localization.Text.Get("SettingsStore_008");
                 AppendWarning(warning);
                 if (plain) Migrate(backup);
                 return backup;
             }
             if (mainExists || File.Exists(BackupPath))
             {
-                LoadWarning = "Файл настроек повреждён или недоступен. Резервная копия недоступна; проверьте параметры перед переключением экранов.";
+                LoadWarning = ControllerHelper.Localization.Text.Get("SettingsStore_009");
                 return new();
             }
             if (legacyFilePath is null || !TryRead(legacyFilePath, out var legacy, out plain, out warning)) return new();
             LoadWarning = warning;
             Migrate(legacy);
-            if (plain) AppendWarning("Старый файл BackToPC может содержать ключ телевизора открытым текстом; удалите его после проверки настроек.");
+            if (plain) AppendWarning(ControllerHelper.Localization.Text.Get("SettingsStore_010"));
             return legacy;
         }
     }
@@ -127,7 +127,7 @@ internal sealed class SettingsFileStore(string directoryPath, string? legacyFile
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or Win32Exception)
         {
             LoadWarning = priorWarning;
-            AppendWarning("Не удалось сохранить защищённые настройки. Проверьте доступ к папке настроек.");
+            AppendWarning(ControllerHelper.Localization.Text.Get("SettingsStore_011"));
         }
     }
 
@@ -156,12 +156,13 @@ internal sealed class SettingsFileStore(string directoryPath, string? legacyFile
         plaintextKey = false; warning = null;
         AppSettings? loaded = JsonSerializer.Deserialize<AppSettings>(json);
         if (loaded is null || loaded.MonitorIds is null) return null;
+        loaded.Language = ControllerHelper.Localization.Text.NormalizeLanguage(loaded.Language);
         using JsonDocument document = JsonDocument.Parse(json);
         if (!string.IsNullOrEmpty(loaded.TelevisionClientKeyProtected))
         {
             try { loaded.TelevisionClientKey = WebOsKeyProtector.Unprotect(loaded.TelevisionClientKeyProtected); }
             catch (Exception error) when (error is Win32Exception or FormatException)
-            { warning = "Ключ телевизора недоступен в этой учётной записи Windows; сопрягите ТВ заново."; }
+            { warning = ControllerHelper.Localization.Text.Get("SettingsStore_012"); }
         }
         else if (document.RootElement.TryGetProperty("TelevisionClientKey", out JsonElement oldKey) &&
             oldKey.ValueKind == JsonValueKind.String)
@@ -180,7 +181,7 @@ internal sealed class SettingsFileStore(string directoryPath, string? legacyFile
             catch (Exception error) when (error is Win32Exception or FormatException or JsonException)
             {
                 loaded.HisensePaired = false;
-                warning = (warning is null ? "" : warning + " ") + "Токен Hisense недоступен; выполните сопряжение заново.";
+                warning = (warning is null ? "" : warning + " ") + ControllerHelper.Localization.Text.Get("SettingsStore_013");
             }
         }
         return loaded;

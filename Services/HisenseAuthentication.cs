@@ -57,13 +57,13 @@ internal sealed class HisenseAuthentication
         using var json = HisenseSession.Parse(payload);
         var root = json.RootElement;
         string ReadToken(string key, bool optional = false) => root.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.String
-            ? value.GetString()! : optional ? "" : throw new InvalidDataException("Hisense не выдал токен доступа.");
+            ? value.GetString()! : optional ? "" : throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseAuthentication_101"));
         int Days(string key, int fallback)
         {
             if (!root.TryGetProperty(key, out var value)) return fallback;
             string text = value.ValueKind == JsonValueKind.String ? value.GetString()! : value.GetRawText();
             if (!int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out int days) || days is < 1 or > 3650)
-                throw new InvalidDataException("Некорректный срок токена Hisense.");
+                throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseAuthentication_102"));
             return days;
         }
         DateTimeOffset Issued(string key)
@@ -71,12 +71,12 @@ internal sealed class HisenseAuthentication
             if (!connection.MobileApp || !root.TryGetProperty(key, out var value)) return now;
             string text = value.ValueKind == JsonValueKind.String ? value.GetString()! : value.GetRawText();
             if (!long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out long seconds) || seconds is < 946684800 or > 253000000000)
-                throw new InvalidDataException("Некорректное время выдачи токена Hisense.");
+                throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseAuthentication_103"));
             DateTimeOffset issued = DateTimeOffset.FromUnixTimeSeconds(seconds);
             // Never extend a token's lifetime because the TV clock is ahead of this PC.
             return issued < now ? issued : now;
         }
-        if (root.ValueKind != JsonValueKind.Object) throw new InvalidDataException("Некорректный ответ авторизации Hisense.");
+        if (root.ValueKind != JsonValueKind.Object) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseAuthentication_104"));
         HisenseAuthentication auth = new()
         {
             ClientId = connection.ClientId, Username = connection.Username, Method = connection.Method,
@@ -84,7 +84,7 @@ internal sealed class HisenseAuthentication
             AccessExpires = Issued("accesstoken_time").AddDays(Days("accesstoken_duration_day", connection.MobileApp ? 2 : 7)),
             RefreshExpires = Issued("refreshtoken_time").AddDays(Days("refreshtoken_duration_day", 30))
         };
-        if (!auth.IsValid()) throw new InvalidDataException("Некорректный токен Hisense.");
+        if (!auth.IsValid()) throw new InvalidDataException(ControllerHelper.Localization.Text.Get("HisenseAuthentication_105"));
         return auth;
     }
 }

@@ -35,20 +35,20 @@ internal static class WebOsSecurity
         string address = TelevisionWakeService.ParseAddress(settings.TelevisionIpAddress).ToString();
         if (settings.AllowInsecureWebOs) return new Uri($"ws://{address}:3000/");
         if (!HasFingerprint(settings.TelevisionCertificateSha256))
-            throw new TelevisionCertificateException("Сначала проверьте и подтвердите сертификат телевизора во вкладке ТВ.");
+            throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("WebOsSecurity_198"));
         return new Uri($"wss://{address}:3001/");
     }
 
     internal static string? SetupWarning(AppSettings settings) => !settings.AllowInsecureWebOs && !HasFingerprint(settings.TelevisionCertificateSha256)
-        ? "Для управления питанием проверьте и подтвердите сертификат во вкладке ТВ. Возврат к мониторам доступен."
+        ? ControllerHelper.Localization.Text.Get("WebOsSecurity_199")
         : null;
 
     internal static AppSettings ApplyCertificate(AppSettings current, TelevisionPairingTarget expected, string fingerprint)
     {
         TelevisionNetworkSettings.RequireLg(current);
         if (TelevisionPairingTarget.From(current) != expected || current.AllowInsecureWebOs)
-            throw new InvalidOperationException("Параметры телевизора изменились. Повторите проверку сертификата.");
-        if (!HasFingerprint(fingerprint)) throw new TelevisionCertificateException("Некорректный отпечаток сертификата.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("WebOsSecurity_200"));
+        if (!HasFingerprint(fingerprint)) throw new TelevisionCertificateException(ControllerHelper.Localization.Text.Get("WebOsSecurity_201"));
         AppSettings updated = current.Copy();
         updated.TelevisionCertificateSha256 = NormalizeFingerprint(fingerprint);
         if (NormalizeFingerprint(current.TelevisionCertificateSha256) != updated.TelevisionCertificateSha256)

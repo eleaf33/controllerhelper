@@ -14,9 +14,9 @@ public sealed class ControllerButtonCatalog
         new("A", "A"), new("B", "B"), new("X", "X"), new("Y", "Y"),
         new("View", "View / Select"), new("Menu", "Menu / Start"),
         new("LeftShoulder", "LB"), new("RightShoulder", "RB"),
-        new("DPadUp", "Крестовина ↑"), new("DPadDown", "Крестовина ↓"),
-        new("DPadLeft", "Крестовина ←"), new("DPadRight", "Крестовина →"),
-        new("LeftThumbstick", "Левый стик"), new("RightThumbstick", "Правый стик")
+        new("DPadUp", ControllerHelper.Localization.Text.Get("ControllerButtonCatalog_045")), new("DPadDown", ControllerHelper.Localization.Text.Get("ControllerButtonCatalog_046")),
+        new("DPadLeft", ControllerHelper.Localization.Text.Get("ControllerButtonCatalog_047")), new("DPadRight", ControllerHelper.Localization.Text.Get("ControllerButtonCatalog_048")),
+        new("LeftThumbstick", ControllerHelper.Localization.Text.Get("ControllerButtonCatalog_049")), new("RightThumbstick", ControllerHelper.Localization.Text.Get("ControllerButtonCatalog_050"))
     ];
 
     public IReadOnlyList<GamepadButtonChoice> Choices => _choices;
@@ -52,7 +52,7 @@ public sealed class ControllerButtonCatalog
     {
         if (_choices.Any(choice => choice.Key == key)) return;
         string label = key.StartsWith("Button:", StringComparison.Ordinal)
-            ? $"Кнопка контроллера {key[7..]}" : key;
+            ? ControllerHelper.Localization.Text.Format("ControllerButtonCatalog_051", key[7..]) : key;
         _choices.Add(new GamepadButtonChoice(key, label));
     }
 

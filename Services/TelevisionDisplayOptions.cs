@@ -21,7 +21,7 @@ internal sealed class TelevisionDisplayOptions(ITelevisionDisplayApi api)
     {
         settings.TelevisionMode?.Validate();
         if (settings.TelevisionScalePercent is int percent && !DisplayScaleRange.IsKnownPercent(percent))
-            throw new InvalidOperationException("Выберите доступный масштаб ТВ из списка Windows.");
+            throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("TelevisionDisplayOptions_180"));
     }
 
     internal void Preflight(AppSettings settings)
@@ -36,7 +36,7 @@ internal sealed class TelevisionDisplayOptions(ITelevisionDisplayApi api)
     internal void Apply(AppSettings settings, Action<Action> registerRollback, CancellationToken cancellation)
     {
         Preflight(settings);
-        string id = settings.TelevisionId ?? throw new InvalidOperationException("Выберите телевизор.");
+        string id = settings.TelevisionId ?? throw new InvalidOperationException(ControllerHelper.Localization.Text.Get("DisplayProfileCodec_058"));
         cancellation.ThrowIfCancellationRequested();
         bool modeMayHaveChanged = false, scaleMayHaveChanged = false;
         if (settings.TelevisionScalePercent is not null)
@@ -61,7 +61,7 @@ internal sealed class TelevisionDisplayOptions(ITelevisionDisplayApi api)
         if (settings.TelevisionMode is { } mode)
         {
             if (!api.GetModes(id).Contains(mode))
-                throw new InvalidOperationException($"Режим ТВ {mode} больше недоступен в Windows. Обновите список режимов.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Format("TelevisionDisplayOptions_181", mode));
             cancellation.ThrowIfCancellationRequested();
             if (api.GetCurrentMode(id) != mode)
             {
@@ -70,7 +70,7 @@ internal sealed class TelevisionDisplayOptions(ITelevisionDisplayApi api)
             }
             cancellation.ThrowIfCancellationRequested();
             if (api.GetCurrentMode(id) != mode)
-                throw new InvalidOperationException($"Windows не применила выбранный режим ТВ {mode}. Выполняется откат.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Format("TelevisionDisplayOptions_182", mode));
         }
         if (settings.TelevisionScalePercent is int percent)
         {
@@ -84,7 +84,7 @@ internal sealed class TelevisionDisplayOptions(ITelevisionDisplayApi api)
             }
             cancellation.ThrowIfCancellationRequested();
             if (api.GetScale(id).CurrentPercent != percent)
-                throw new InvalidOperationException($"Windows не применила масштаб ТВ {percent}%. Выполняется откат.");
+                throw new InvalidOperationException(ControllerHelper.Localization.Text.Format("TelevisionDisplayOptions_183", percent));
         }
     }
 }
@@ -101,6 +101,6 @@ internal sealed class DisplaySettingsRollback
             try { action(); } catch (Exception error) { errors.Add(error); }
         try { restoreTopology(); } catch (Exception error) { errors.Add(error); }
         if (errors.Count > 0)
-            throw new AggregateException("Не удалось полностью восстановить параметры дисплея.", errors);
+            throw new AggregateException(ControllerHelper.Localization.Text.Get("TelevisionDisplayOptions_184"), errors);
     }
 }
