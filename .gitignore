@@ -1,0 +1,41 @@
+**/bin/
+**/obj/
+.work/
+.dotnet-cli/
+publish*/
+.vs/
+*.user
+*.suo
+
+# Local diagnostics, user settings and development history
+AGENTS.md
+**/logs/
+*.log
+*.log.*
+*.jsonl
+*.jsonl.*
+settings.json
+settings.json.*
+.env
+.env.*
+!.env.example
+.codex/
+.agents/
+
+# Generated packages, installers and downloaded research material
+*.zip
+*.7z
+*.rar
+*.apk
+*.nupkg
+*.exe
+*.dll
+*.pdb
+*.msi
+
+# Private keys stay local, including shared Hisense protocol credentials.
+*.pfx
+*.p12
+*.key
+*.pem
+!ThirdParty/Hisense/vidaa_client.pem

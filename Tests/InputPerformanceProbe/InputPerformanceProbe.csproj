@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.22000.0</TargetPlatformMinVersion>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <ApplicationManifest>../../app.manifest</ApplicationManifest>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+    <Compile Include="../../Native/GameInputNative.cs" Link="GameInputNative.cs" />
+    <Compile Include="../../Native/NativeMethodCache.cs" Link="NativeMethodCache.cs" />
+    <Compile Include="../../Services/GameInputService.cs" Link="GameInputService.cs" />
+    <Compile Include="../../Services/ControllerDevice.cs" Link="ControllerDevice.cs" />
+    <Compile Include="../../Services/ControllerSelection.cs" Link="ControllerSelection.cs" />
+    <Compile Include="../../Services/ControllerPollingCadence.cs" Link="ControllerPollingCadence.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,56 @@
+Private-key material is NOT distributed in this source repository.
+vidaa_client.key, remotenow_client.pem and vidaa_ios_client.pem are local-only
+build inputs excluded from Git. References below document their provenance for
+developers who independently obtain permission to use those materials.
+The public certificate vidaa_client.pem contains no private key.
+Tests use newly generated test-only certificates and do not embed vendor keys.
+
+VIDAA protocol reference and optional shared client certificate material:
+https://github.com/tombabolewski/vidaa-control
+Pinned commit: 1a25834469c8e7af51be8b50fe71b69c0546b1d3
+Files: vidaa/certs/vidaa_client.pem, vidaa/certs/vidaa_client.key
+Copyright (c) 2025 Tom Babolewski. MIT license: LICENSE.txt in this directory.
+
+This certificate is a shared protocol credential distributed by that project,
+not a per-user identity, TV pairing PIN, or trust anchor for server validation.
+ControllerHelper separately pins the TV server certificate after user confirmation.
+PIN authorization uses a persistent, randomly generated ControllerHelper client ID.
+The VIDAA credential algorithm and protocol detection are adapted from
+vidaa/credentials.py, vidaa/protocol.py, vidaa/config/constants.py at the pinned
+commit above under the same MIT license. PIN/token flow references vidaa/client.py.
+This experimental implementation supports static and dynamic MQTT 3.1.1 auth,
+including PIN-issued access/refresh tokens. Compatibility with a particular
+TV firmware requires hardware testing. User tokens are protected with Windows DPAPI.
+
+Additional protocol reference (independent implementation, no source copied):
+https://github.com/sehaas/ha_hisense_tv
+
+RemoteNOW 3.1 wire profile and shared client certificate:
+https://github.com/V4n1X/ha_hisense_tv
+Pinned commit: ee8b2bab32badf1eced43f3c9ee7b8fc3be5f071
+Certificate source: custom_components/hisense_tv/certs/hisense_client.pem
+Protocol reference: docs/PROTOCOL.md (MQIsdp level 3, string PIN, busy/close responses).
+Copyright (c) 2026 jonas. MIT license: LICENSE.RemoteNOW.txt.
+The certificate matches the U7QF reference rcm_certchain_pem.cer published at
+https://github.com/d3nd3/Hisense-mqtt-keyfiles
+commit 13af030e53d5239d104de752cd782a920bfe820e (SHA-1 fingerprint
+4F5B4304FB67E940246A1C1771C6BB007D22F1A1; used for provenance, not server trust).
+This is shared protocol material, not a certificate taken from a user's phone.
+
+MQTT transport: MQTTnet 5.2.0.1603, MIT license, .NET Foundation contributors.
+https://github.com/dotnet/MQTTnet
+
+Compatibility profile verified against a user-supplied Android APK:
+Remote Control for HiSense Smart TV 6.5.2.2 (versionCode 63)
+Package: com.allrcs.hisense_remote
+APK SHA-256: FC876C604FD028BBA9C09471C272AEEE597D8F9080F4EC8C829F959F1D4A6B08
+Static analysis only; the APK was not executed. Android source code and APK are
+not included in ControllerHelper. The wire behavior is independently implemented.
+Profiles: VIDAA_V1 (old certificate/legacy password), VIDAA_V1B (old certificate/
+modern password), VIDAA_V2 (IOS certificate/modern password), MQTT 3.1.1 then 3.1.
+The shared certificate in vidaa_ios_client.pem comes from res/raw/vidaa_cert.p12
+in that supplied APK. Subject CN=VidaaAppIOSV01, expires 2034-06-25;
+SHA-1 C637CC55BB7937AC4B8ED67BB93797E6E7B90AF6 (provenance only, not server trust).
+This is vendor protocol material, not a user's phone identity or pairing token.
+The MIT notices above apply to their respective referenced projects, not to
+the Android application. No ownership of that application is claimed.

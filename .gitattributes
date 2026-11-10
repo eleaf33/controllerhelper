@@ -1,0 +1,14 @@
+* text=auto
+*.cs text eol=crlf
+*.xaml text eol=crlf
+*.csproj text eol=crlf
+*.ps1 text eol=crlf
+*.md text eol=lf
+*.json text eol=lf
+*.config text eol=lf
+*.manifest text eol=lf
+*.svg text eol=lf
+*.ico binary
+# Preserve the exact upstream bytes of shared protocol material.
+*.pem -text -whitespace
+*.key -text -whitespace

@@ -1,0 +1,101 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
+    <Compile Include="Program.cs" />
+    <Compile Include="HisenseMqttTests.cs" />
+    <Compile Include="HisenseTestCertificates.cs" />
+    <Compile Include="HisenseAuthenticationTests.cs" />
+    <Compile Include="HisenseMobileAppTests.cs" />
+    <Compile Include="HisensePowerTests.cs" />
+    <Compile Include="../Services/HisenseAuthentication.cs" Link="HisenseAuthentication.cs" />
+    <Compile Include="../Services/HisenseSettings.cs" Link="HisenseSettings.cs" />
+    <Compile Include="../Services/HisenseSession.cs" Link="HisenseSession.cs" />
+    <Compile Include="../Services/HisenseSession.Power.cs" Link="HisenseSession.Power.cs" />
+    <Compile Include="../Services/TelevisionReturnOperation.cs" Link="TelevisionReturnOperation.cs" />
+    <Compile Include="../Services/HisenseMqttTransport.cs" Link="HisenseMqttTransport.cs" />
+    <Compile Include="../Services/HisenseDiagnostics.cs" Link="HisenseDiagnostics.cs" />
+    <Compile Include="../Services/HisenseTelevisionService.cs" Link="HisenseTelevisionService.cs" />
+    <Compile Include="TelevisionNetworkTests.cs" />
+    <Compile Include="../Services/TelevisionNetworkSettings.cs" Link="TelevisionNetworkSettings.cs" />
+    <Compile Include="TelevisionAudioFallbackTests.cs" />
+    <Compile Include="../Services/TelevisionAudioFallback.cs" Link="TelevisionAudioFallback.cs" />
+    <Compile Include="../Services/AudioEndpoint.cs" Link="AudioEndpoint.cs" />
+    <Compile Include="AudioEndpointTests.cs" />
+    <Compile Include="../Services/LogLocation.cs" Link="LogLocation.cs" />
+    <Compile Include="PriorityAuditTests.cs" />
+    <Compile Include="../Services/OverlayOperation.cs" Link="OverlayOperation.cs" />
+    <Compile Include="EmergencyReturnTests.cs" />
+    <Compile Include="../Services/EmergencyHotkey.cs" Link="EmergencyHotkey.cs" />
+    <Compile Include="../Services/PcRecoveryOperation.cs" Link="PcRecoveryOperation.cs" />
+    <Compile Include="../Services/ControllerButtonCatalog.cs" Link="ControllerButtonCatalog.cs" />
+    <Compile Include="SettingsFileTests.cs" />
+    <Compile Include="AudioRoleTests.cs" />
+    <Compile Include="../Models/SettingsStore.cs" Link="SettingsStore.cs" />
+    <Compile Include="../Services/AudioRoleOperations.cs" Link="AudioRoleOperations.cs" />
+    <Compile Include="NativeMethodCacheTests.cs" />
+    <Compile Include="InputPollingTests.cs" />
+    <Compile Include="../Services/ControllerPollingCadence.cs" Link="ControllerPollingCadence.cs" />
+    <Compile Include="../Native/NativeMethodCache.cs" Link="NativeMethodCache.cs" />
+    <Compile Include="StageOneTests.cs" />
+    <Compile Include="InputIsolationTests.cs" />
+    <Compile Include="OverlayGeometryTests.cs" />
+    <Compile Include="TelevisionVideoTests.cs" />
+    <Compile Include="../Models/TelevisionVideoMode.cs" Link="TelevisionVideoMode.cs" />
+    <Compile Include="../Services/DisplayScaleRange.cs" Link="DisplayScaleRange.cs" />
+    <Compile Include="../Services/TelevisionDisplayOptions.cs" Link="TelevisionDisplayOptions.cs" />
+    <Compile Include="../Services/WindowsTelevisionDisplayApi.cs" Link="WindowsTelevisionDisplayApi.cs" />
+    <Compile Include="../Native/DisplayVideoNative.cs" Link="DisplayVideoNative.cs" />
+    <Compile Include="../Services/OverlayGeometry.cs" Link="OverlayGeometry.cs" />
+    <Compile Include="StageTwoTests.cs" />
+    <Compile Include="TelevisionReadinessTests.cs" />
+    <Compile Include="DisplayProfileTests.cs" />
+    <Compile Include="ErrorJournalTests.cs" />
+    <Compile Include="FlydigiDiagnosticsTests.cs" />
+    <Compile Include="FlydigiWindowSelectionTests.cs" />
+    <Compile Include="FlydigiWindowActivationTests.cs" />
+    <Compile Include="../Services/FlydigiWindowActivation.cs" Link="FlydigiWindowActivation.cs" />
+    <Compile Include="../Services/FlydigiWindowSelection.cs" Link="FlydigiWindowSelection.cs" />
+    <Compile Include="../Services/FlydigiDiagnostics.cs" Link="FlydigiDiagnostics.cs" />
+    <Compile Include="WebOsSecurityTests.cs" />
+    <Compile Include="LgInputTests.cs" />
+    <Compile Include="LgInputCompatibilityTests.cs" />
+    <Compile Include="../Services/WebOsTelevisionService.Inputs.cs" Link="WebOsTelevisionService.Inputs.cs" />
+    <Compile Include="../Services/WebOsTelevisionService.InputResponses.cs" Link="WebOsTelevisionService.InputResponses.cs" />
+    <Compile Include="../Services/LgInputSettings.cs" Link="LgInputSettings.cs" />
+    <Compile Include="../Services/WebOsSecurity.cs" Link="WebOsSecurity.cs" />
+    <Compile Include="../Services/WebOsConnection.cs" Link="WebOsConnection.cs" />
+    <Compile Include="../Services/TelevisionCertificateProbe.cs" Link="TelevisionCertificateProbe.cs" />
+    <Compile Include="../Services/TelevisionWakeService.cs" Link="TelevisionWakeService.cs" />
+    <Compile Include="../Services/WebOsTelevisionService.cs" Link="WebOsTelevisionService.cs" />
+    <Compile Include="../Native/DisplayConfig.cs" Link="DisplayConfig.cs" />
+    <Compile Include="../Models/DisplayProfile.cs" Link="DisplayProfile.cs" />
+    <Compile Include="../Services/DisplayProfileCodec.cs" Link="DisplayProfileCodec.cs" />
+    <Compile Include="../Services/ErrorLog.cs" Link="ErrorLog.cs" />
+    <Compile Include="../Services/TelevisionReadiness.cs" Link="TelevisionReadiness.cs" />
+    <Compile Include="../Services/TelevisionPairingTarget.cs" Link="TelevisionPairingTarget.cs" />
+    <Compile Include="../Services/TelevisionPowerProbe.cs" Link="TelevisionPowerProbe.cs" />
+    <Compile Include="../Services/OverlayStateRefresh.cs" Link="OverlayStateRefresh.cs" />
+    <Compile Include="../Services/CommandProtocol.cs" Link="CommandProtocol.cs" />
+    <Compile Include="InputTestDoubles.cs" />
+    <Compile Include="../Services/ControllerDevice.cs" Link="ControllerDevice.cs" />
+    <Compile Include="../Services/ControllerInputRouter.cs" Link="ControllerInputRouter.cs" />
+    <Compile Include="../Services/ControllerMonitor.cs" Link="ControllerMonitor.cs" />
+    <Compile Include="../Services/ControllerSelection.cs" Link="ControllerSelection.cs" />
+    <Compile Include="../Services/StartupTrace.cs" Link="StartupTrace.cs" />
+    <Compile Include="../Services/ProfileOperationCoordinator.cs" Link="ProfileOperationCoordinator.cs" />
+    <Compile Include="../Services/ProfileSwitchTransaction.cs" Link="ProfileSwitchTransaction.cs" />
+    <Compile Include="../Services/TelevisionOverlayState.cs" Link="TelevisionOverlayState.cs" />
+    <Compile Include="../Services/OverlayActionPolicy.cs" Link="OverlayActionPolicy.cs" />
+    <Compile Include="../Services/OverlayPresentation.cs" Link="OverlayPresentation.cs" />
+    <Compile Include="../Services/OverlayNavigation.cs" Link="OverlayNavigation.cs" />
+    <Compile Include="../Services/WebOsKeyProtector.cs" Link="WebOsKeyProtector.cs" />
+    <Compile Include="../Models/AppSettings.cs" Link="AppSettings.cs" />
+  </ItemGroup>
+</Project>
