@@ -1,5 +1,7 @@
 # ControllerHelper
 
+**Приложение предназначено только для телевизоров LG (webOS) и Hisense (VIDAA).**
+
 [English](README.md) | **Русский**
 
 https://github.com/user-attachments/assets/4a70d565-ffcf-4dd3-a843-1d2bf8607def
